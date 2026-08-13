@@ -1,0 +1,283 @@
+.footer {
+  background-color: #1A0105; /* Deep luxury plum-black */
+  color: var(--palette-champagne);
+  padding: 3rem 0 1.5rem;
+  border-top: 1px solid rgba(181, 111, 114, 0.15); /* Soft rose separator */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ambient bottom glow in crimson/gold tones */
+.footer::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: 5%;
+  width: 35rem;
+  height: 35rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 28, 51, 0.07) 0%, rgba(197, 155, 39, 0.02) 50%, transparent 80%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1.1fr 1.1fr 1.8fr;
+  gap: 2.5rem;
+  margin-bottom: 2.2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.footer-brand {
+  margin-bottom: 0.8rem;
+}
+
+.footer-logo-img {
+  height: 135px;
+  width: auto;
+  opacity: 0.95;
+  object-fit: contain;
+}
+
+.footer-text {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--palette-champagne);
+  opacity: 0.75;
+  max-width: 280px;
+}
+
+.footer-heading {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-weight: 600;
+  margin-bottom: 0.9rem;
+  color: var(--palette-gold);
+  position: relative;
+  display: inline-block;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.footer-links a {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--palette-champagne);
+  opacity: 0.7;
+  letter-spacing: 0.06em;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+              color 0.4s ease, 
+              opacity 0.4s ease;
+  display: inline-block;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+  color: var(--palette-rose);
+  transform: translateX(6px);
+}
+
+/* ── Private Client Services Directory ── */
+.footer-client-services {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+.client-service-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--palette-champagne);
+  opacity: 0.8;
+}
+
+.service-icon {
+  color: var(--palette-gold);
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.service-link {
+  color: var(--palette-champagne);
+  transition: color 0.3s ease, opacity 0.3s ease;
+  border-bottom: 1px solid rgba(230, 208, 169, 0.15);
+  padding-bottom: 1px;
+}
+
+.service-link:hover {
+  color: var(--palette-gold);
+  border-color: var(--palette-gold);
+}
+
+.service-text {
+  letter-spacing: 0.02em;
+}
+
+/* Book Consultation Bespoke Button */
+.footer-cta-link {
+  display: inline-block;
+  border: 1px solid var(--palette-rose);
+  color: var(--palette-champagne);
+  background-color: transparent;
+  padding: 0.6rem 1.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+              background-color 0.4s ease,
+              border-color 0.4s ease,
+              color 0.4s ease,
+              box-shadow 0.4s ease;
+  text-align: center;
+}
+
+.footer-cta-link:hover {
+  transform: translateY(-2px);
+  background-color: var(--palette-gold);
+  border-color: var(--palette-gold);
+  color: var(--palette-burgundy);
+  box-shadow: 0 5px 20px rgba(197, 155, 39, 0.25);
+}
+
+/* ── Footer Bottom Segment ── */
+.footer-bottom {
+  border-top: 1px solid rgba(181, 111, 114, 0.15);
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.footer-copyright {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  color: var(--palette-champagne);
+  opacity: 0.55;
+  letter-spacing: 0.05em;
+}
+
+/* Crafted In India Shimmer Signature */
+.crafted-india-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crafted-india {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--palette-champagne) 0%, var(--palette-gold) 50%, var(--palette-champagne) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 6s linear infinite;
+  text-shadow: 0 0 12px rgba(197, 155, 39, 0.15);
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Social icons circular frames styling */
+.socials {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.socials a {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(181, 111, 114, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--palette-champagne);
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+              background-color 0.4s ease,
+              border-color 0.4s ease,
+              color 0.4s ease,
+              box-shadow 0.4s ease;
+}
+
+.socials a:hover {
+  background-color: var(--palette-crimson);
+  color: #ffffff;
+  border-color: var(--palette-rose);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 5px 15px rgba(139, 28, 51, 0.35);
+}
+
+/* ── Responsive Adaptations ── */
+@media (max-width: 1024px) {
+  .footer-top {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+  
+  .footer-brand-col {
+    grid-column: span 2;
+    margin-bottom: 0.8rem;
+  }
+  
+  .footer-logo-img {
+    height: 95px;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer {
+    padding: 3rem 0 2rem;
+  }
+  
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .footer-brand-col {
+    grid-column: span 1;
+  }
+  
+  .footer-bottom {
+    flex-direction: column-reverse;
+    gap: 1.5rem;
+    text-align: center;
+    padding-top: 1.5rem;
+  }
+  
+  .socials {
+    justify-content: center;
+  }
+  
+  .footer-cta-link {
+    width: 100%;
+  }
+}

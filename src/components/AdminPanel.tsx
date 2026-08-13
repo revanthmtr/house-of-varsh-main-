@@ -1,0 +1,931 @@
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Image as ImageIcon, LayoutDashboard, Package, FileEdit, ShoppingBag, Users as UsersIcon, LogOut, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useSiteContent } from '../context/SiteContentContext';
+import './AdminPanel.css';
+
+interface AdminPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: string;
+  category: string;
+  img: string;
+  badge?: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  google_id: string;
+  auth_method: string;
+  created_at: string;
+  last_login: string;
+  login_count: number;
+  last_ip: string;
+  last_device: string;
+}
+
+interface OrderItem {
+  id: number;
+  order_id: number;
+  product_id: number | null;
+  name: string;
+  price: string;
+  img: string;
+  category: string;
+  quantity: number;
+}
+
+interface Order {
+  id: number;
+  user_id: number;
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  payment_method: string;
+  total_amount: number;
+  shipping_name: string;
+  shipping_phone: string;
+  shipping_address: string;
+  shipping_city?: string;
+  shipping_pincode?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  user_name: string;
+  user_email: string;
+  items: OrderItem[];
+}
+
+interface AuditLog {
+  id: number;
+  timestamp: string;
+  email: string;
+  action: string;
+  ip_address: string;
+  status: 'success' | 'failed' | 'threat';
+  details: string;
+}
+
+// Section definitions — order and labels shown in the UI
+const CONTENT_SECTIONS = [
+  {
+    section: 'header',
+    label: 'Header & Navigation',
+    keys: [
+      { key: 'logo_src',         label: 'Logo Image',      type: 'image' },
+      { key: 'nav_link_1_label', label: 'Nav Link 1 Label',type: 'text'  },
+      { key: 'nav_link_1_href',  label: 'Nav Link 1 URL',  type: 'text'  },
+      { key: 'nav_link_2_label', label: 'Nav Link 2 Label',type: 'text'  },
+      { key: 'nav_link_2_href',  label: 'Nav Link 2 URL',  type: 'text'  },
+      { key: 'nav_link_3_label', label: 'Nav Link 3 Label',type: 'text'  },
+      { key: 'nav_link_3_href',  label: 'Nav Link 3 URL',  type: 'text'  },
+    ],
+  },
+  {
+    section: 'hero',
+    label: 'Hero Slider',
+    keys: [
+      { key: 'slide_1_image',    label: 'Slide 1 — Image',    type: 'image' },
+      { key: 'slide_1_subtitle', label: 'Slide 1 — Subtitle', type: 'text'  },
+      { key: 'slide_1_title',    label: 'Slide 1 — Title',    type: 'text'  },
+      { key: 'slide_2_image',    label: 'Slide 2 — Image',    type: 'image' },
+      { key: 'slide_2_subtitle', label: 'Slide 2 — Subtitle', type: 'text'  },
+      { key: 'slide_2_title',    label: 'Slide 2 — Title',    type: 'text'  },
+      { key: 'slide_3_image',    label: 'Slide 3 — Image',    type: 'image' },
+      { key: 'slide_3_subtitle', label: 'Slide 3 — Subtitle', type: 'text'  },
+      { key: 'slide_3_title',    label: 'Slide 3 — Title',    type: 'text'  },
+      { key: 'cta_button_label', label: 'CTA Button Label',   type: 'text'  },
+    ],
+  },
+  {
+    section: 'latest_collection',
+    label: 'Latest Collection',
+    keys: [
+      { key: 'section_title',         label: 'Section Title',              type: 'text'  },
+      { key: 'tab_1_label',           label: 'Tab 1 Label',                type: 'text'  },
+      { key: 'tab_2_label',           label: 'Tab 2 Label',                type: 'text'  },
+      { key: 'description_new',       label: 'Description — Newly Launched', type: 'text' },
+      { key: 'description_bestseller',label: 'Description — Best Seller',  type: 'text'  },
+      { key: 'divider_image',         label: 'Divider Image',              type: 'image' },
+    ],
+  },
+  {
+    section: 'photo_gallery',
+    label: 'Photo Gallery',
+    keys: [
+      { key: 'section_title', label: 'Section Title',          type: 'text'  },
+      { key: 'photo_1_src',   label: 'Photo 1 — Image',        type: 'image' },
+      { key: 'photo_1_alt',   label: 'Photo 1 — Alt Text',     type: 'text'  },
+      { key: 'photo_2_src',   label: 'Photo 2 — Image',        type: 'image' },
+      { key: 'photo_2_alt',   label: 'Photo 2 — Alt Text',     type: 'text'  },
+      { key: 'photo_3_src',   label: 'Photo 3 — Image',        type: 'image' },
+      { key: 'photo_3_alt',   label: 'Photo 3 — Alt Text',     type: 'text'  },
+      { key: 'photo_4_src',   label: 'Photo 4 — Image',        type: 'image' },
+      { key: 'photo_4_alt',   label: 'Photo 4 — Alt Text',     type: 'text'  },
+    ],
+  },
+  {
+    section: 'shop_by_collection',
+    label: 'Shop By Collection',
+    keys: [
+      { key: 'section_title', label: 'Section Title',          type: 'text'  },
+      { key: 'card_1_image',  label: 'Card 1 — Image',         type: 'image' },
+      { key: 'card_1_title',  label: 'Card 1 — Title',         type: 'text'  },
+      { key: 'card_2_image',  label: 'Card 2 — Image',         type: 'image' },
+      { key: 'card_2_title',  label: 'Card 2 — Title',         type: 'text'  },
+      { key: 'card_3_image',  label: 'Card 3 — Image',         type: 'image' },
+      { key: 'card_3_title',  label: 'Card 3 — Title',         type: 'text'  },
+    ],
+  },
+  {
+    section: 'brand_story',
+    label: 'Brand Story',
+    keys: [
+      { key: 'eyebrow_text',    label: 'Eyebrow / Subtitle',   type: 'text'  },
+      { key: 'logo_src',        label: 'Brand Logo Image',     type: 'image' },
+      { key: 'story_paragraph', label: 'Story Paragraph',      type: 'text'  },
+      { key: 'cta_button_label',label: 'CTA Button Label',     type: 'text'  },
+      { key: 'editorial_image', label: 'Editorial Photo',      type: 'image' },
+    ],
+  },
+  {
+    section: 'footer',
+    label: 'Footer',
+    keys: [
+      { key: 'logo_src',               label: 'Footer Logo',               type: 'image' },
+      { key: 'tagline',                label: 'Tagline',                   type: 'text'  },
+      { key: 'explore_heading',        label: 'Explore Column Heading',    type: 'text'  },
+      { key: 'explore_link_1',         label: 'Explore Link 1',            type: 'text'  },
+      { key: 'explore_link_2',         label: 'Explore Link 2',            type: 'text'  },
+      { key: 'explore_link_3',         label: 'Explore Link 3',            type: 'text'  },
+      { key: 'explore_link_4',         label: 'Explore Link 4',            type: 'text'  },
+      { key: 'help_heading',           label: 'Help Column Heading',       type: 'text'  },
+      { key: 'help_link_1',            label: 'Help Link 1',               type: 'text'  },
+      { key: 'help_link_2',            label: 'Help Link 2',               type: 'text'  },
+      { key: 'help_link_3',            label: 'Help Link 3',               type: 'text'  },
+      { key: 'help_link_4',            label: 'Help Link 4',               type: 'text'  },
+      { key: 'newsletter_heading',     label: 'Newsletter Heading',        type: 'text'  },
+      { key: 'newsletter_description', label: 'Newsletter Description',    type: 'text'  },
+      { key: 'newsletter_placeholder', label: 'Email Placeholder',         type: 'text'  },
+      { key: 'newsletter_btn_label',   label: 'Subscribe Button Label',    type: 'text'  },
+      { key: 'copyright_text',         label: 'Copyright Text',            type: 'text'  },
+    ],
+  },
+];
+
+// ── Site Content Editor ──────────────────────────────────────────────────────
+const SiteContentEditor: React.FC = () => {
+  const { token } = useAuth();
+  const { get, updateSection } = useSiteContent();
+
+  const [localEdits, setLocalEdits] = useState<Record<string, string>>({});
+  const [savingSection, setSavingSection] = useState<string | null>(null);
+  const [savedSections, setSavedSections] = useState<Set<string>>(new Set());
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  const compositeKey = (section: string, key: string) => `${section}__${key}`;
+
+  const currentValue = (section: string, key: string) => {
+    const ck = compositeKey(section, key);
+    return localEdits[ck] !== undefined ? localEdits[ck] : get(section, key, '');
+  };
+
+  const handleChange = (section: string, key: string, value: string) => {
+    setLocalEdits(prev => ({ ...prev, [compositeKey(section, key)]: value }));
+    setSavedSections(prev => { const s = new Set(prev); s.delete(section); return s; });
+  };
+
+  const handleFileUpload = async (section: string, key: string, file: File) => {
+    if (!token) return;
+    setUploadingField(compositeKey(section, key));
+    
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      handleChange(section, key, data.url);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
+  const handleSaveSection = async (section: string, keys: { key: string }[]) => {
+    setSavingSection(section);
+
+    // Collect only the fields that have been changed
+    const changedFields: Record<string, string> = {};
+    for (const { key } of keys) {
+      const ck = compositeKey(section, key);
+      if (localEdits[ck] !== undefined) {
+        changedFields[key] = localEdits[ck];
+      }
+    }
+
+    if (Object.keys(changedFields).length === 0) {
+      setSavingSection(null);
+      setSavedSections(prev => new Set(prev).add(section));
+      return;
+    }
+
+    try {
+      // ONE request for the entire section
+      const res = await fetch(`/api/content/${section}/bulk`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ fields: changedFields }),
+      });
+
+      if (!res.ok) throw new Error('Save failed');
+
+      const updatedSection = await res.json();
+      
+      // Update local React Context INSTANTLY and avoid browser cache issues
+      updateSection(section, updatedSection);
+      
+      setSavedSections(prev => new Set(prev).add(section));
+      setLocalEdits(prev => {
+        const next = { ...prev };
+        keys.forEach(({ key }) => delete next[compositeKey(section, key)]);
+        return next;
+      });
+    } catch {
+      alert('Failed to save. Please try again.');
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
+  return (
+    <div className="ap-content-editor">
+      {CONTENT_SECTIONS.map(({ section, label, keys }) => (
+        <div className="ap-card" key={section}>
+          <div className="ap-card-header">
+            <h3>{label}</h3>
+            <button
+              className={`ap-btn-primary ${savedSections.has(section) ? 'saved' : ''}`}
+              onClick={() => handleSaveSection(section, keys)}
+              disabled={savingSection === section}
+            >
+              {savingSection === section
+                ? 'Saving…'
+                : savedSections.has(section)
+                  ? <><Check size={14} style={{ marginRight: 6 }} /> Saved</>
+                  : 'Save Changes'}
+            </button>
+          </div>
+
+          <div className="ap-card-body ap-grid-2">
+            {keys.map(({ key, label: fieldLabel, type }) => {
+              const val = currentValue(section, key);
+              const dbVal = get(section, key, '');
+              const isDirty = localEdits[compositeKey(section, key)] !== undefined &&
+                              localEdits[compositeKey(section, key)] !== dbVal;
+              const isUploading = uploadingField === compositeKey(section, key);
+
+              return (
+                <div className={`ap-field ${isDirty ? 'dirty' : ''}`} key={key}>
+                  <label>
+                    {type === 'image' && <ImageIcon size={12} style={{ marginRight: 6, opacity: 0.5 }} />}
+                    {fieldLabel}
+                    {isDirty && <span className="ap-badge-dot" title="Unsaved change" />}
+                  </label>
+
+                  {type === 'image' && (
+                    <div className="ap-image-field">
+                      {val && (
+                        <div className="ap-image-preview">
+                          <img src={val} alt={fieldLabel} onError={e => (e.currentTarget.style.display = 'none')} />
+                        </div>
+                      )}
+                      <div className="ap-input-with-btn">
+                        <input
+                          type="text"
+                          className="ap-input"
+                          value={val}
+                          onChange={e => handleChange(section, key, e.target.value)}
+                          placeholder="Image URL..."
+                        />
+                        <label className="ap-btn-outline" style={{ cursor: isUploading ? 'wait' : 'pointer' }}>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            style={{ display: 'none' }} 
+                            disabled={isUploading}
+                            onChange={e => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileUpload(section, key, file);
+                            }}
+                          />
+                          {isUploading ? '...' : 'Upload'}
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {type === 'text' && fieldLabel.toLowerCase().includes('paragraph') ? (
+                    <textarea
+                      className="ap-input ap-textarea"
+                      value={val}
+                      onChange={e => handleChange(section, key, e.target.value)}
+                      rows={4}
+                    />
+                  ) : type === 'text' && (
+                    <input
+                      type="text"
+                      className="ap-input"
+                      value={val}
+                      onChange={e => handleChange(section, key, e.target.value)}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ── Main Admin Panel ─────────────────────────────────────────────────────────
+const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
+  const { token, user } = useAuth();
+  const [activeMenu, setActiveMenu] = useState<'dashboard' | 'products' | 'content' | 'orders' | 'customers' | 'security'>('dashboard');
+  
+  // Data States
+  const [products, setProducts] = useState<Product[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  
+  // Product Form State
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [formData, setFormData] = useState({ name: '', price: '', category: 'new', img: '', badge: '' });
+
+  const fetchData = async () => {
+    if (!token) return;
+    try {
+      const [prodRes, userRes, orderRes, auditRes] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/admin/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      const p = await prodRes.json();
+      const u = await userRes.json();
+      const o = await orderRes.json();
+      const a = await auditRes.json();
+      setProducts(p);
+      if (Array.isArray(u)) setUsers(u);
+      if (Array.isArray(o)) setOrders(o);
+      if (Array.isArray(a)) setAuditLogs(a);
+    } catch (err) {
+      console.error('Error fetching admin data', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) fetchData();
+  }, [isOpen, activeMenu]);
+
+  // Product Handlers
+  const handleProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const url = editingId ? `/api/products/${editingId}` : '/api/products';
+    const method = editingId ? 'PUT' : 'POST';
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('Failed to save product');
+      fetchData();
+      setEditingId(null);
+      setFormData({ name: '', price: '', category: 'new', img: '', badge: '' });
+    } catch (err) {
+      console.error(err);
+      alert('Error saving product');
+    }
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingId(product.id);
+    setFormData({ name: product.name, price: product.price, category: product.category, img: product.img, badge: product.badge || '' });
+    setActiveMenu('products');
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this product forever?')) return;
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Order Handlers
+  const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
+  const handleOrderStatusChange = async (orderId: number, status: string) => {
+    if (!token) return;
+    setUpdatingOrderId(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('Failed to update order status');
+      setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: status as Order['status'] } : o)));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update order status.');
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  // Helper values
+  const totalRevenue = orders
+    .filter(o => o.status !== 'cancelled')
+    .reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
+
+  const adminPanelContent = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="ap-overlay"
+          initial={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
+          transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+        >
+          <div className="ap-container">
+            {/* Sidebar */}
+            <div className="ap-sidebar">
+              <div className="ap-sidebar-brand">
+                House of Varsh
+                <span>HQ System Panel</span>
+              </div>
+              
+              <nav className="ap-nav">
+                <button className={`ap-nav-item ${activeMenu === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveMenu('dashboard')}>
+                  <LayoutDashboard size={18} /> Dashboard
+                </button>
+                <div className="ap-nav-divider">Managment</div>
+                <button className={`ap-nav-item ${activeMenu === 'orders' ? 'active' : ''}`} onClick={() => setActiveMenu('orders')}>
+                  <ShoppingBag size={18} /> Live Orders
+                  {orders.length > 0 && <span className="ap-nav-badge">{orders.length}</span>}
+                </button>
+                <button className={`ap-nav-item ${activeMenu === 'customers' ? 'active' : ''}`} onClick={() => setActiveMenu('customers')}>
+                  <UsersIcon size={18} /> Customers
+                </button>
+                <button className={`ap-nav-item ${activeMenu === 'products' ? 'active' : ''}`} onClick={() => setActiveMenu('products')}>
+                  <Package size={18} /> Product Catalog
+                </button>
+                <button className={`ap-nav-item ${activeMenu === 'content' ? 'active' : ''}`} onClick={() => setActiveMenu('content')}>
+                  <FileEdit size={18} /> Site Content Editor
+                </button>
+                <div className="ap-nav-divider">Security</div>
+                <button className={`ap-nav-item ${activeMenu === 'security' ? 'active' : ''}`} onClick={() => setActiveMenu('security')} style={activeMenu === 'security' ? {} : { color: auditLogs.some(l => l.status === 'threat') ? '#ef4444' : undefined }}>
+                  <ShieldAlert size={18} /> Audit Logs
+                  {auditLogs.filter(l => l.status === 'threat').length > 0 && (
+                    <span className="ap-nav-badge" style={{ background: '#ef4444' }}>
+                      {auditLogs.filter(l => l.status === 'threat').length}
+                    </span>
+                  )}
+                </button>
+              </nav>
+              
+              <div className="ap-sidebar-footer">
+                <div className="ap-user-info">
+                  <strong>{user?.name}</strong>
+                  <span>Super Admin</span>
+                </div>
+                <button className="ap-nav-item" style={{ color: '#ef4444', marginTop: '1rem' }} onClick={onClose}>
+                  <LogOut size={18} /> Exit HQ
+                </button>
+              </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="ap-main">
+              <div className="ap-header">
+                <div className="ap-header-left">
+                  <button className="ap-back-btn" onClick={onClose} title="Return to website">
+                    <ArrowLeft size={16} />
+                    <span>Preview Site</span>
+                  </button>
+                  <div className="ap-header-divider" />
+                  <h2>
+                    {activeMenu === 'dashboard' && 'Executive Dashboard'}
+                    {activeMenu === 'orders' && 'Real-time Order Tracking'}
+                    {activeMenu === 'customers' && 'Customer Intelligence'}
+                    {activeMenu === 'products' && 'Product Matrix'}
+                    {activeMenu === 'content' && 'Global Content Layout'}
+                    {activeMenu === 'security' && 'Security & Audit Logs'}
+                  </h2>
+                </div>
+                <div className="ap-header-actions">
+                  <div className="ap-status-dot"></div> Live Network Connect
+                </div>
+              </div>
+
+              <div className="ap-viewport" data-lenis-prevent>
+                
+                {/* ── DASHBOARD ── */}
+                {activeMenu === 'dashboard' && (
+                  <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="ap-dashboard">
+                    <div className="ap-stats-grid">
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Total Revenue</span>
+                        <div className="ap-stat-value">&#8377;{totalRevenue.toLocaleString('en-IN')}</div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Total Orders</span>
+                        <div className="ap-stat-value">{orders.length}</div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Total Authenticated Clients</span>
+                        <div className="ap-stat-value">{users.length}</div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Products Active</span>
+                        <div className="ap-stat-value">{products.length}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="ap-dashboard-recent">
+                      <div className="ap-card ap-interactive-hover" style={{ flex: 1 }}>
+                        <div className="ap-card-header">
+                          <h3>Recent Orders</h3>
+                        </div>
+                        <div className="ap-table-wrapper">
+                          <table className="ap-table">
+                            <thead>
+                              <tr>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {orders.slice(0, 5).map(o => (
+                                <tr key={o.id}>
+                                  <td><strong>{o.user_name || 'Guest'}</strong><br/><span style={{opacity: 0.5}}>{o.user_email}</span></td>
+                                  <td>{(o.items || []).map(i => i.name).join(', ')}</td>
+                                  <td>&#8377;{Number(o.total_amount).toLocaleString('en-IN')}</td>
+                                  <td><span className={`ap-badge status-${o.status}`} style={{ borderRadius: '30px' }}>{o.status}</span></td>
+                                </tr>
+                              ))}
+                              {orders.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', opacity: 0.5 }}>No recent activity to display.</td></tr>}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* ── ORDERS ── */}
+                {activeMenu === 'orders' && (
+                  <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                    <div className="ap-card ap-interactive-hover">
+                      <div className="ap-card-header">
+                        <h3>Live Orders</h3>
+                        <button className="ap-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }} onClick={fetchData}>&#8635; Refresh</button>
+                      </div>
+                      <div className="ap-table-wrapper">
+                        <table className="ap-table">
+                          <thead>
+                            <tr>
+                              <th>Order</th>
+                              <th>Customer</th>
+                              <th>Items</th>
+                              <th>Shipping To</th>
+                              <th>Total</th>
+                              <th>Payment</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {orders.map(o => (
+                              <tr key={o.id}>
+                                <td style={{fontFamily: 'monospace', opacity: 0.7}}>
+                                  #{o.id.toString().padStart(4, '0')}
+                                  <br/><span style={{opacity: 0.5, fontSize: '0.7rem'}}>{new Date(o.created_at).toLocaleDateString('en-IN')}</span>
+                                </td>
+                                <td><strong>{o.user_name || 'Guest'}</strong><br/><span style={{opacity: 0.5, fontSize: '0.8rem'}}>{o.user_email}</span></td>
+                                <td>
+                                  {(o.items || []).map(item => (
+                                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+                                      <img src={item.img} alt={item.name} style={{width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0}} />
+                                      <span style={{ fontSize: '0.8rem' }}>{item.name}</span>
+                                    </div>
+                                  ))}
+                                </td>
+                                <td style={{ fontSize: '0.8rem', maxWidth: '180px' }}>
+                                  <strong>{o.shipping_name}</strong><br/>
+                                  {o.shipping_phone}<br/>
+                                  <span style={{ opacity: 0.7 }}>{o.shipping_address}{o.shipping_city ? `, ${o.shipping_city}` : ''} {o.shipping_pincode || ''}</span>
+                                </td>
+                                <td><strong>&#8377;{Number(o.total_amount).toLocaleString('en-IN')}</strong></td>
+                                <td style={{ textTransform: 'uppercase', fontSize: '0.75rem', opacity: 0.7 }}>{o.payment_method}</td>
+                                <td>
+                                  <select
+                                    value={o.status}
+                                    disabled={updatingOrderId === o.id}
+                                    onChange={(e) => handleOrderStatusChange(o.id, e.target.value)}
+                                    className={`ap-badge ap-status-select status-${o.status}`}
+                                  >
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            ))}
+                            {orders.length === 0 && <tr><td colSpan={7} style={{ textAlign: 'center', opacity: 0.5, padding: '3rem' }}>No orders yet.</td></tr>}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* ── CUSTOMERS ── */}
+                {activeMenu === 'customers' && (
+                  <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                    {/* Summary row */}
+                    <div className="ap-stats-grid" style={{ marginBottom: '2.5rem' }}>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Total Clients</span>
+                        <div className="ap-stat-value">{users.length}</div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Google Accounts</span>
+                        <div className="ap-stat-value">{users.filter(u => u.auth_method === 'google').length}</div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Email Accounts</span>
+                        <div className="ap-stat-value">{users.filter(u => u.auth_method === 'email').length}</div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Total Logins</span>
+                        <div className="ap-stat-value">{users.reduce((s, u) => s + (u.login_count || 0), 0)}</div>
+                      </div>
+                    </div>
+
+                    <div className="ap-card ap-interactive-hover">
+                      <div className="ap-card-header">
+                        <h3>Client Intelligence Database</h3>
+                        <button className="ap-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }} onClick={fetchData}>↺ Refresh</button>
+                      </div>
+                      <div className="ap-table-wrapper">
+                        <table className="ap-table">
+                          <thead>
+                            <tr>
+                              <th>CID</th>
+                              <th>Full Name</th>
+                              <th>Email Address</th>
+                              <th>Role</th>
+                              <th>Auth Method</th>
+                              <th>Joined</th>
+                              <th>Last Login</th>
+                              <th>Logins</th>
+                              <th>Last IP</th>
+                              <th>Device / Browser</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {users.map(u => {
+                              // Parse device string to a short readable label
+                              const deviceShort = u.last_device
+                                ? u.last_device.replace(/\(.*?\)/g, '').trim().substring(0, 50)
+                                : '—';
+                              return (
+                                <tr key={u.id}>
+                                  <td style={{ fontFamily: 'monospace', opacity: 0.6, fontSize: '0.78rem' }}>#{u.id}</td>
+                                  <td><strong>{u.name || '—'}</strong></td>
+                                  <td style={{ fontSize: '0.87rem' }}>{u.email}</td>
+                                  <td>
+                                    <span className={`ap-badge ${u.role === 'admin' ? 'admin' : 'standard'}`}>
+                                      {u.role?.toUpperCase() || 'USER'}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    {u.auth_method === 'google'
+                                      ? <span style={{ color: '#4285F4', fontWeight: 600, fontSize: '0.82rem' }}>◉ Google</span>
+                                      : <span style={{ opacity: 0.7, fontSize: '0.82rem' }}>✉ Email</span>}
+                                  </td>
+                                  <td style={{ fontSize: '0.8rem', opacity: 0.7, whiteSpace: 'nowrap' }}>
+                                    {u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                  </td>
+                                  <td style={{ fontSize: '0.8rem', opacity: 0.7, whiteSpace: 'nowrap' }}>
+                                    {u.last_login ? new Date(u.last_login).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
+                                  </td>
+                                  <td>
+                                    <span style={{ background: 'rgba(180,130,70,0.1)', color: 'var(--ap-accent)', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600 }}>
+                                      {u.login_count || 0}×
+                                    </span>
+                                  </td>
+                                  <td style={{ fontFamily: 'monospace', fontSize: '0.78rem', opacity: 0.6 }}>{u.last_ip || '—'}</td>
+                                  <td style={{ fontSize: '0.78rem', opacity: 0.6, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={u.last_device || ''}>
+                                    {deviceShort}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                            {users.length === 0 && (
+                              <tr><td colSpan={10} style={{ textAlign: 'center', opacity: 0.5, padding: '3rem' }}>No clients registered yet.</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+
+                {/* ── PRODUCTS ── */}
+                {activeMenu === 'products' && (
+                  <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="ap-grid-columns">
+                    {/* Form Component */}
+                    <div className="ap-card ap-interactive-hover" style={{ height: 'fit-content' }}>
+                      <div className="ap-card-header">
+                        <h3>{editingId ? 'Modify Matrix' : 'Deploy New Asset'}</h3>
+                      </div>
+                      <div className="ap-card-body">
+                        <form onSubmit={handleProductSubmit} className="ap-form">
+                          <div className="ap-field">
+                            <label>Product Name</label>
+                            <input type="text" className="ap-input" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
+                          </div>
+                          <div className="ap-grid-2">
+                            <div className="ap-field">
+                              <label>Price Vector</label>
+                              <input type="text" className="ap-input" placeholder="$X,XXX" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required />
+                            </div>
+                            <div className="ap-field">
+                              <label>Category Label</label>
+                              <input type="text" className="ap-input" placeholder="new / bestseller" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} required />
+                            </div>
+                          </div>
+                          <div className="ap-field">
+                            <label>Image Source</label>
+                            <input type="text" className="ap-input" value={formData.img} onChange={e => setFormData({ ...formData, img: e.target.value })} required />
+                          </div>
+                          <div className="ap-field">
+                            <label>Highlight Badge</label>
+                            <input type="text" className="ap-input" placeholder="e.g. LIMITED EDITION" value={formData.badge} onChange={e => setFormData({ ...formData, badge: e.target.value })} />
+                          </div>
+                          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                            <button type="submit" className="ap-btn-primary" style={{ flex: 1 }}>{editingId ? 'Update Asset' : 'Initialize Product'}</button>
+                            {editingId && (
+                              <button type="button" className="ap-btn-outline" onClick={() => { setEditingId(null); setFormData({ name: '', price: '', category: 'new', img: '', badge: '' }); }}>Abort</button>
+                            )}
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+
+                    {/* Products List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {products.map(product => (
+                        <div className="ap-product-card ap-interactive-hover" key={product.id}>
+                          <img src={product.img} alt={product.name} />
+                          <div className="ap-info">
+                            <h4>{product.name}</h4>
+                            <span>{product.price} // {product.category.toUpperCase()}</span>
+                          </div>
+                          <div className="ap-actions">
+                            <button className="ap-btn-outline ap-btn-hover" onClick={() => handleEditProduct(product)}>EDIT</button>
+                            <button className="ap-btn-danger ap-btn-hover" onClick={() => handleDeleteProduct(product.id)}>KILL</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* ── CONTENT ── */}
+                {activeMenu === 'content' && (
+                  <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                    <SiteContentEditor />
+                  </motion.div>
+                )}
+
+                {/* ── SECURITY LOGS ── */}
+                {activeMenu === 'security' && (
+                  <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                    <div className="ap-security-summary">
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Total Events</span>
+                        <div className="ap-stat-value">{auditLogs.length}</div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Successful Logins</span>
+                        <div className="ap-stat-value" style={{ color: '#10b981' }}>
+                          {auditLogs.filter(l => l.status === 'success').length}
+                        </div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Failed Attempts</span>
+                        <div className="ap-stat-value" style={{ color: '#f59e0b' }}>
+                          {auditLogs.filter(l => l.status === 'failed').length}
+                        </div>
+                      </div>
+                      <div className="ap-stat-card ap-interactive-hover">
+                        <span className="ap-stat-label">Threat Detections</span>
+                        <div className="ap-stat-value" style={{ color: '#ef4444' }}>
+                          {auditLogs.filter(l => l.status === 'threat').length}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="ap-card ap-interactive-hover">
+                      <div className="ap-card-header">
+                        <h3>Live Activity Feed</h3>
+                        <button className="ap-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }} onClick={fetchData}>↺ Refresh</button>
+                      </div>
+                      <div className="ap-table-wrapper">
+                        <table className="ap-table">
+                          <thead>
+                            <tr>
+                              <th>Timestamp</th>
+                              <th>Email / Actor</th>
+                              <th>Event</th>
+                              <th>IP Address</th>
+                              <th>Details</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {auditLogs.map(log => (
+                              <tr key={log.id}>
+                                <td style={{ fontFamily: 'monospace', fontSize: '0.78rem', opacity: 0.7, whiteSpace: 'nowrap' }}>
+                                  {new Date(log.timestamp).toLocaleString()}
+                                </td>
+                                <td><strong>{log.email || '—'}</strong></td>
+                                <td>{log.action}</td>
+                                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{log.ip_address || '—'}</td>
+                                <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{log.details || '—'}</td>
+                                <td>
+                                  <span className={`ap-badge ${
+                                    log.status === 'success' ? 'success' :
+                                    log.status === 'failed' ? 'warning' : 'threat'
+                                  }`}>
+                                    {log.status.toUpperCase()}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                            {auditLogs.length === 0 && (
+                              <tr>
+                                <td colSpan={6} style={{ textAlign: 'center', opacity: 0.5, padding: '3rem' }}>
+                                  No activity recorded yet. Events will appear here after logins.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return ReactDOM.createPortal(adminPanelContent, document.body);
+};
+
+export default AdminPanel;

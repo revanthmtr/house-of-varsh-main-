@@ -1,0 +1,138 @@
+import { useEffect, useCallback } from 'react';
+import Lenis from 'lenis';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { useGoogleOneTapLogin } from '@react-oauth/google';
+import Hero from './components/Hero';
+import Header from './components/Header';
+import LatestCollection from './components/LatestCollection';
+import ShopByCollection from './components/ShopByCollection';
+import BrandStory from './components/BrandStory';
+import PhotoGallery from './components/PhotoGallery';
+import VoicesMuses from './components/VoicesMuses';
+import PrivateAtelier from './components/PrivateAtelier';
+import Footer from './components/Footer';
+import CartDrawer from './components/CartDrawer';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import { SiteContentProvider } from './context/SiteContentContext';
+
+const CustomCursor = () => {
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+  const ringX = useMotionValue(-100);
+  const ringY = useMotionValue(-100);
+
+  const springConfig = { damping: 28, stiffness: 400, mass: 0.1 };
+  const cursorXSpring = useSpring(cursorX, springConfig);
+  const cursorYSpring = useSpring(cursorY, springConfig);
+  
+  const ringConfig = { damping: 35, stiffness: 200, mass: 0.3 };
+  const ringXSpring = useSpring(ringX, ringConfig);
+  const ringYSpring = useSpring(ringY, ringConfig);
+
+  useEffect(() => {
+    const moveCursor = (e: MouseEvent) => {
+      cursorX.set(e.clientX - 6);
+      cursorY.set(e.clientY - 6);
+      ringX.set(e.clientX - 20);
+      ringY.set(e.clientY - 20);
+    };
+
+    window.addEventListener('mousemove', moveCursor);
+    return () => window.removeEventListener('mousemove', moveCursor);
+  }, [cursorX, cursorY, ringX, ringY]);
+
+  return (
+    <>
+      <motion.div
+        className="cursor-dot"
+        style={{ x: cursorXSpring, y: cursorYSpring }}
+      />
+      <motion.div
+        className="cursor-ring"
+        style={{ x: ringXSpring, y: ringYSpring }}
+      />
+    </>
+  );
+};
+
+// ── Google One Tap — fires automatically for unauthenticated visitors ──────────
+const GoogleOneTap = () => {
+  const { user, login } = useAuth();
+
+  const handleOneTapSuccess = useCallback(async (credentialResponse: any) => {
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: credentialResponse.credential })
+      });
+      const data = await res.json();
+      if (res.ok) login(data.token, data.user);
+    } catch (err) {
+      console.error('One Tap error:', err);
+    }
+  }, [login]);
+
+  useGoogleOneTapLogin({
+    onSuccess: handleOneTapSuccess,
+    onError: () => console.log('One Tap dismissed'),
+    disabled: !!user, // Don't show if already logged in
+    cancel_on_tap_outside: false,
+    prompt_parent_id: 'one-tap-container',
+  });
+
+  return <div id="one-tap-container" style={{ position: 'fixed', top: '80px', right: '24px', zIndex: 50000 }} />;
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
+function App() {
+  useEffect(() => {
+    const lenis = new Lenis({
+      lerp: 0.08,
+      wheelMultiplier: 1.1,
+      touchMultiplier: 2,
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      syncTouch: true
+    });
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return (
+    <AuthProvider>
+      <SiteContentProvider>
+        <CartProvider>
+          <CustomCursor />
+          <GoogleOneTap />
+          <Header />
+          <main>
+            <Hero />
+            <LatestCollection />
+            <PhotoGallery />
+            <ShopByCollection />
+            <BrandStory />
+            <VoicesMuses />
+            <PrivateAtelier />
+          </main>
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
+      </SiteContentProvider>
+    </AuthProvider>
+  );
+}
+
+export default App;

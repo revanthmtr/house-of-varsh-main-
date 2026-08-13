@@ -1,0 +1,894 @@
+.latest-collection {
+  background-color: var(--blush);
+  color: var(--burgundy);
+  padding: 8rem 0;
+}
+
+.latest-collection .section-header {
+  margin-bottom: 5rem;
+  position: relative;
+}
+
+.latest-collection .lc-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.latest-collection .lc-eyebrow-line {
+  display: block;
+  height: 1px;
+  width: 2.5rem;
+  background-color: var(--accent);
+}
+
+.latest-collection .lc-eyebrow-text {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--wine);
+  font-weight: 500;
+  font-family: var(--font-sans);
+}
+
+.latest-collection .lc-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--primary);
+  margin-bottom: 2rem;
+  letter-spacing: -0.01em;
+}
+
+.latest-collection .lc-heading-italic {
+  font-style: italic;
+  background: linear-gradient(135deg, #FFE8B6 0%, #D4AF37 50%, #A88924 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-top: 1.5rem;
+}
+
+.tab {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgba(26, 10, 16, 0.45);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.6rem 1rem;
+  transition: color 0.4s ease;
+  position: relative;
+}
+
+.tab:hover {
+  color: var(--burgundy);
+}
+
+.tab.active {
+  color: var(--burgundy);
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 40px;
+  height: 1px;
+  background-color: var(--gold);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.tab.active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.collection-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 5rem;
+  margin-top: 2rem;
+}
+
+.product-grid {
+  flex: 2.2;
+  display: flex;
+  gap: 2.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 1.5rem 0.5rem 1.8rem 0.5rem;
+  margin-top: -1.5rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Luxury Gold-Dust Scrollbar Styling */
+.product-grid::-webkit-scrollbar {
+  height: 4px;
+}
+
+.product-grid::-webkit-scrollbar-track {
+  background: rgba(42, 1, 8, 0.08);
+  border-radius: 10px;
+}
+
+.product-grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, var(--palette-rose) 0%, var(--palette-gold) 100%);
+  border-radius: 10px;
+}
+
+.product-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--palette-gold);
+}
+
+.collection-info-box {
+  flex: 0.9;
+  text-align: center;
+  padding: 4.5rem 3.5rem;
+  background: linear-gradient(145deg, #2D0814 0%, #4A0E21 60%, #350A18 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 6px;
+  position: sticky;
+  top: 120px;
+  box-shadow: 0 20px 45px rgba(45, 8, 20, 0.18);
+  overflow: hidden;
+}
+
+/* Custom Climbing Floral Decoration Overlays */
+.floral-decor-left {
+  position: absolute;
+  left: -15px;
+  bottom: -5px;
+  width: 105px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  transform-origin: bottom left;
+  animation: floralGrow 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.floral-decor-right {
+  position: absolute;
+  right: -15px;
+  top: -5px;
+  width: 105px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  transform-origin: top right;
+  animation: floralGrow 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes floralGrow {
+  from {
+    opacity: 0;
+    transform: scale(0.92) rotate(1deg);
+  }
+  to {
+    opacity: 0.85;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Premium Shimmering & Hover Micro-Interactions        */
+/* ---------------------------------------------------- */
+
+/* Setup local origins for nested hover elements */
+.bird-wing-top {
+  transform-origin: 22px 13px;
+}
+
+.bird-wing-bottom {
+  transform-origin: 20px 16px;
+}
+
+.flower-rotate,
+.flower-rotate-reverse {
+  transform-origin: 0px 0px;
+}
+
+/* Set coordinate origins matching stem connection joints for leaf sway */
+.floral-decor-left .floral-leaf:nth-of-type(1) .leaf-sway { transform-origin: 6px 270px; }
+.floral-decor-left .floral-leaf:nth-of-type(2) .leaf-sway { transform-origin: 8px 230px; }
+.floral-decor-left .floral-leaf:nth-of-type(3) .leaf-sway { transform-origin: 12px 175px; }
+.floral-decor-left .floral-leaf:nth-of-type(4) .leaf-sway { transform-origin: 23px 115px; }
+.floral-decor-left .floral-leaf:nth-of-type(5) .leaf-sway { transform-origin: 22px 65px; }
+
+.floral-decor-right .floral-leaf:nth-of-type(1) .leaf-sway { transform-origin: 91px 30px; }
+.floral-decor-right .floral-leaf:nth-of-type(2) .leaf-sway { transform-origin: 85px 95px; }
+.floral-decor-right .floral-leaf:nth-of-type(3) .leaf-sway { transform-origin: 84px 150px; }
+.floral-decor-right .floral-leaf:nth-of-type(4) .leaf-sway { transform-origin: 72px 210px; }
+.floral-decor-right .floral-leaf:nth-of-type(5) .leaf-sway { transform-origin: 74px 260px; }
+
+/* Micro-Animation Keyframes */
+@keyframes wingFlutterTop {
+  0% { transform: rotate(0deg) skewX(0deg); }
+  100% { transform: rotate(-28deg) skewX(-12deg); }
+}
+
+@keyframes wingFlutterBottom {
+  0% { transform: rotate(0deg) skewX(0deg); }
+  100% { transform: rotate(24deg) skewX(10deg); }
+}
+
+@keyframes birdBob {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-4px) translateX(2px); }
+}
+
+@keyframes flowerRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes flowerRotateReverse {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes leafSwayLeft {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(5deg); }
+}
+
+@keyframes leafSwayRight {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-5deg); }
+}
+
+/* Hover triggers bound to .collection-info-box hover state */
+.collection-info-box:hover .bird-body-bob {
+  animation: birdBob 3.2s ease-in-out infinite;
+}
+
+.collection-info-box:hover .bird-wing-top {
+  animation: wingFlutterTop 0.08s ease-in-out infinite alternate;
+}
+
+.collection-info-box:hover .bird-wing-bottom {
+  animation: wingFlutterBottom 0.08s ease-in-out infinite alternate;
+}
+
+.collection-info-box:hover .flower-rotate {
+  animation: flowerRotate 9s linear infinite;
+}
+
+.collection-info-box:hover .flower-rotate-reverse {
+  animation: flowerRotateReverse 11s linear infinite;
+}
+
+.collection-info-box:hover .leaf-sway {
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.collection-info-box:hover .floral-decor-left .floral-leaf:nth-of-type(even) .leaf-sway,
+.collection-info-box:hover .floral-decor-right .floral-leaf:nth-of-type(odd) .leaf-sway {
+  animation: leafSwayLeft 3.5s ease-in-out infinite alternate;
+}
+
+.collection-info-box:hover .floral-decor-left .floral-leaf:nth-of-type(odd) .leaf-sway,
+.collection-info-box:hover .floral-decor-right .floral-leaf:nth-of-type(even) .leaf-sway {
+  animation: leafSwayRight 4s ease-in-out infinite alternate;
+}
+
+/* Static Fallback - Ensure all nested elements are fully visible and properly placed by default */
+.floral-decor-left .floral-stem,
+.floral-decor-right .floral-stem {
+  stroke-dasharray: 450;
+  stroke-dashoffset: 0;
+}
+
+.floral-decor-left .floral-leaf,
+.floral-decor-right .floral-leaf {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.floral-decor-left .floral-branch,
+.floral-decor-right .floral-branch {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.floral-decor-left .floral-flower {
+  transform: translate(52px, 210px) scale(1);
+  opacity: 1;
+}
+
+.floral-decor-right .floral-flower-large {
+  transform: translate(32px, 70px) scale(1);
+  opacity: 1;
+}
+
+.floral-decor-right .floral-flower-small {
+  transform: translate(35px, 242px) scale(1);
+  opacity: 1;
+}
+
+.floral-decor-left .flying-folk-bird {
+  transform: translate(25px, 75px) scale(1);
+  opacity: 1;
+}
+
+/* ---------------------------------------------------- */
+/* Premium Scroll-Telling (Scroll-Driven) Animations   */
+/* ---------------------------------------------------- */
+
+@keyframes drawStem {
+  from {
+    stroke-dashoffset: 450;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sproutLeaf {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bloomFlowerLeft {
+  from {
+    transform: translate(52px, 210px) scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(52px, 210px) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes bloomFlowerLargeRight {
+  from {
+    transform: translate(32px, 70px) scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(32px, 70px) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes bloomFlowerSmallRight {
+  from {
+    transform: translate(35px, 242px) scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(35px, 242px) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes glideBird {
+  from {
+    transform: translate(75px, 140px) scale(0.3) rotate(-25deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(25px, 75px) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Scroll timelines only apply if the user has no motion sensitivity preference */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: 0% 100%)) {
+    /* Setup scroll timeline container */
+    .collection-layout {
+      view-timeline: --collectionTimeline block;
+    }
+
+    /* Disable time-based entrance fallback animation in favor of scroll animation */
+    .floral-decor-left,
+    .floral-decor-right {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+
+    /* --- Left Decoration Scroll Animations --- */
+
+    .floral-decor-left .floral-stem {
+      stroke-dasharray: 450;
+      stroke-dashoffset: 450;
+      animation: drawStem auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 5% contain 35%;
+    }
+
+    .floral-decor-left .floral-leaf:nth-of-type(1) {
+      transform-origin: 6px 270px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 10% contain 20%;
+    }
+
+    .floral-decor-left .floral-leaf:nth-of-type(2) {
+      transform-origin: 8px 230px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 14% contain 24%;
+    }
+
+    .floral-decor-left .floral-leaf:nth-of-type(3) {
+      transform-origin: 12px 175px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 18% contain 28%;
+    }
+
+    .floral-decor-left .floral-leaf:nth-of-type(4) {
+      transform-origin: 23px 115px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 22% contain 32%;
+    }
+
+    .floral-decor-left .floral-leaf:nth-of-type(5) {
+      transform-origin: 22px 65px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 26% contain 36%;
+    }
+
+    .floral-decor-left .floral-branch:nth-of-type(1) {
+      transform-origin: 12px 210px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 15% contain 25%;
+    }
+
+    .floral-decor-left .floral-branch:nth-of-type(2) {
+      transform-origin: 16px 130px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 20% contain 30%;
+    }
+
+    .floral-decor-left .floral-flower {
+      transform-origin: 52px 210px;
+      animation: bloomFlowerLeft auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 17% contain 29%;
+    }
+
+    .floral-decor-left .flying-folk-bird {
+      transform-origin: 25px 75px;
+      animation: glideBird auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 22% contain 42%;
+    }
+
+    /* --- Right Decoration Scroll Animations --- */
+
+    .floral-decor-right .floral-stem {
+      stroke-dasharray: 450;
+      stroke-dashoffset: 450;
+      animation: drawStem auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 5% contain 35%;
+    }
+
+    .floral-decor-right .floral-leaf:nth-of-type(1) {
+      transform-origin: 91px 30px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 10% contain 20%;
+    }
+
+    .floral-decor-right .floral-leaf:nth-of-type(2) {
+      transform-origin: 85px 95px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 14% contain 24%;
+    }
+
+    .floral-decor-right .floral-leaf:nth-of-type(3) {
+      transform-origin: 84px 150px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 18% contain 28%;
+    }
+
+    .floral-decor-right .floral-leaf:nth-of-type(4) {
+      transform-origin: 72px 210px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 22% contain 32%;
+    }
+
+    .floral-decor-right .floral-leaf:nth-of-type(5) {
+      transform-origin: 74px 260px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 26% contain 36%;
+    }
+
+    .floral-decor-right .floral-branch:nth-of-type(1) {
+      transform-origin: 88px 40px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 11% contain 21%;
+    }
+
+    .floral-decor-right .floral-branch:nth-of-type(2) {
+      transform-origin: 86px 70px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 15% contain 25%;
+    }
+
+    .floral-decor-right .floral-branch:nth-of-type(3) {
+      transform-origin: 72px 235px;
+      animation: sproutLeaf auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 23% contain 33%;
+    }
+
+    .floral-decor-right .floral-flower-large {
+      transform-origin: 32px 70px;
+      animation: bloomFlowerLargeRight auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 17% contain 32%;
+    }
+
+    .floral-decor-right .floral-flower-small {
+      transform-origin: 35px 242px;
+      animation: bloomFlowerSmallRight auto linear forwards;
+      animation-timeline: --collectionTimeline;
+      animation-range: entry 25% contain 37%;
+    }
+  }
+}
+
+.collection-description {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-style: italic;
+  font-weight: 300;
+  color: #F7E7CE;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.elegant-underline {
+  display: flex;
+  justify-content: center;
+  opacity: 0.6;
+  position: relative;
+  z-index: 2;
+}
+
+.custom-divider {
+  width: 80%;
+  max-width: 250px;
+  height: auto;
+}
+
+.product-card {
+  flex: 0 0 300px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  background-color: #ffffff;
+  border-radius: 4px;
+  padding: 0.8rem;
+  box-shadow: 0 10px 30px rgba(26, 10, 16, 0.02);
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px rgba(26, 10, 16, 0.06);
+}
+
+.product-image-container {
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 3/4;
+  margin-bottom: 1.5rem;
+  background-color: var(--blush);
+  border-radius: 2px;
+}
+
+.product-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: var(--wine);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.4rem 1rem;
+  z-index: 2;
+  border-radius: 2px;
+  border: 1px solid rgba(231, 210, 168, 0.3);
+}
+
+/* Glass Heart Wishlist Button */
+.wishlist-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  cursor: pointer;
+  background: rgba(253, 251, 247, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(231, 210, 168, 0.25);
+  color: var(--burgundy);
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.wishlist-btn:hover {
+  background: var(--burgundy);
+  color: var(--gold);
+  border-color: var(--burgundy);
+  transform: scale(1.08);
+}
+
+.wishlist-btn.active {
+  background: var(--wine);
+  color: var(--gold);
+  border-color: var(--wine);
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.04);
+}
+
+/* Elegant quick-add overlay */
+.quick-add-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(26, 10, 16, 0.95) 0%, rgba(26, 10, 16, 0.7) 100%);
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: var(--gold);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  z-index: 10;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.product-image-container:hover .quick-add-overlay {
+  transform: translateY(0);
+}
+
+.quick-add-overlay:hover {
+  background: var(--wine);
+  color: #ffffff;
+}
+
+.quick-add-overlay svg {
+  transition: transform 0.3s;
+}
+
+.quick-add-overlay:hover svg {
+  transform: scale(1.1);
+}
+
+.product-info {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.product-name {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.4rem;
+  color: var(--burgundy);
+  transition: color 0.3s;
+}
+
+.product-card:hover .product-name {
+  color: var(--wine);
+}
+
+.product-price {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--rose);
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 1024px) {
+  .collection-layout {
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 991px) {
+  .collection-layout {
+    flex-direction: column-reverse;
+    gap: 3rem;
+  }
+  
+  .collection-info-box {
+    width: 100%;
+    position: static;
+    padding: 2.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-grid {
+    gap: 1.5rem;
+    padding-bottom: 1.2rem;
+  }
+  .product-card {
+    flex: 0 0 250px;
+  }
+}
+
+@media (max-width: 580px) {
+  .floral-decor-left,
+  .floral-decor-right {
+    display: none;
+  }
+  .collection-info-box {
+    padding: 3rem 1.8rem;
+  }
+}
+
+/* Special Chumbak-meets-Luxury Painting Card */
+.painting-model-card {
+  flex: 0 0 450px;
+  scroll-snap-align: start;
+  background: linear-gradient(145deg, #2D0814 0%, #4A0E21 60%, #350A18 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+  position: relative;
+  overflow: hidden;
+  padding: 1.2rem !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 15px 35px rgba(26, 62, 47, 0.08);
+}
+
+.painting-model-card::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border: 1px dashed rgba(250, 249, 246, 0.7);
+  opacity: 0.75;
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+.painting-card-frame {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.painting-card-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.painting-illustration-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: transparent;
+  border-radius: 2px;
+  border: none;
+  padding: 0.5rem 0.2rem;
+  overflow: hidden;
+}
+
+.painting-svg {
+  width: 100%;
+  height: auto;
+  max-height: 190px;
+  filter: drop-shadow(0 6px 12px rgba(26, 62, 47, 0.15));
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.painting-model-card:hover .painting-svg {
+  transform: scale(1.04) rotate(0.5deg);
+}
+
+.painting-card-text {
+  text-align: center;
+  padding: 0.5rem 0.2rem;
+}
+
+.painting-card-tag {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8B1C33 !important;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.painting-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #1A2D2B !important;
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.01em;
+}
+
+.painting-card-description {
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.5;
+  color: #1D3E2F !important;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .painting-model-card {
+    flex: 0 0 350px !important;
+  }
+}

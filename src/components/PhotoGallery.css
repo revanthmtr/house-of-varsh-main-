@@ -1,0 +1,307 @@
+/* ================================================================
+   Featured Collections — PhotoGallery
+   Inspired by house-of-varsh.lovable.app
+   ================================================================ */
+
+.fc-section {
+  background-color: var(--bg);
+  padding: 5rem 0 6rem;
+}
+
+.fc-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ── Header ── */
+.fc-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.fc-header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+/* Eyebrow — matches New Arrivals pattern */
+.fc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.fc-eyebrow-line {
+  display: block;
+  height: 1px;
+  width: 2.5rem;
+  background-color: var(--accent);
+}
+
+.fc-eyebrow-text {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--wine);
+  font-weight: 500;
+}
+
+.fc-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--primary);
+  margin: 0;
+}
+
+.fc-title-italic {
+  font-style: italic;
+  background: linear-gradient(135deg, #FFE8B6 0%, #D4AF37 50%, #A88924 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline;
+}
+
+.fc-view-all {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--burgundy);
+  text-decoration: none;
+  white-space: nowrap;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.3s ease, border-color 0.3s ease;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.fc-view-all:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Grid ── */
+/*
+  Layout (desktop):
+  ┌─────────────────┬───────────┬───────────┐
+  │                 │  Sarees   │  Gowns    │
+  │  Bridal (tall)  ├───────────┼───────────┤
+  │                 │  Contemp  │  Festive  │
+  └─────────────────┴───────────┴───────────┘
+*/
+.fc-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-areas:
+    "bridal saree gown"
+    "bridal contemporary festive";
+  gap: 0.6rem;
+  height: 82vh;
+  max-height: 860px;
+  min-height: 560px;
+}
+
+/* ── Cards ── */
+.fc-card {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  text-decoration: none;
+  background-color: #111;
+}
+
+.fc-card--bridal  { grid-area: bridal; }
+.fc-card--saree   { grid-area: saree; }
+.fc-card--gown    { grid-area: gown; }
+.fc-card--contemporary { grid-area: contemporary; }
+.fc-card--festive { grid-area: festive; }
+
+/* ── Image ── */
+.fc-card__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 1.6s cubic-bezier(0.25, 1, 0.5, 1),
+              opacity 0.6s ease;
+  opacity: 0.88;
+  will-change: transform;
+}
+
+.fc-card:hover .fc-card__img {
+  transform: scale(1.07);
+  opacity: 0.78;
+}
+
+/* ── Gradient overlay ── */
+.fc-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(18, 8, 12, 0.88) 0%,
+    rgba(18, 8, 12, 0.28) 45%,
+    rgba(18, 8, 12, 0) 100%
+  );
+  z-index: 2;
+  transition: background 0.6s ease;
+}
+
+.fc-card:hover .fc-card__overlay {
+  background: linear-gradient(
+    to top,
+    rgba(59, 10, 27, 0.92) 0%,
+    rgba(59, 10, 27, 0.36) 50%,
+    rgba(59, 10, 27, 0.05) 100%
+  );
+}
+
+/* ── Text body ── */
+.fc-card__body {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 2rem 2.2rem;
+  z-index: 3;
+}
+
+.fc-card--bridal .fc-card__body {
+  padding: 2.4rem 2.6rem;
+}
+
+.fc-card__tag {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.5rem;
+  opacity: 0.9;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  transform: translateY(4px);
+}
+
+.fc-card:hover .fc-card__tag {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fc-card__title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  transition: color 0.4s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  /* Size varies by card type */
+  font-size: clamp(1.35rem, 2.2vw, 2rem);
+}
+
+.fc-card--bridal .fc-card__title {
+  font-size: clamp(1.9rem, 3vw, 3rem);
+}
+
+.fc-card:hover .fc-card__title {
+  color: #fff;
+  transform: translateX(3px);
+}
+
+/* Gold underline that grows on hover */
+.fc-card__line {
+  display: block;
+  height: 1px;
+  width: 0;
+  margin-top: 0.85rem;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  transition: width 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.fc-card:hover .fc-card__line {
+  width: 3.5rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .fc-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "bridal bridal"
+      "saree  gown"
+      "contemporary festive";
+    height: auto;
+    max-height: none;
+    min-height: auto;
+  }
+
+  .fc-card--bridal {
+    aspect-ratio: 16 / 9;
+  }
+
+  .fc-card--saree,
+  .fc-card--gown,
+  .fc-card--contemporary,
+  .fc-card--festive {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (max-width: 640px) {
+  .fc-section {
+    padding: 3.5rem 0 4.5rem;
+  }
+
+  .fc-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .fc-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "bridal"
+      "saree"
+      "gown"
+      "contemporary"
+      "festive";
+    gap: 0.5rem;
+  }
+
+  .fc-card--bridal {
+    aspect-ratio: 3 / 4;
+  }
+
+  .fc-card--saree,
+  .fc-card--gown,
+  .fc-card--contemporary,
+  .fc-card--festive {
+    aspect-ratio: 4 / 3;
+  }
+
+  .fc-card__body {
+    padding: 1.5rem 1.6rem;
+  }
+
+  .fc-card--bridal .fc-card__body {
+    padding: 1.75rem 1.8rem;
+  }
+}
