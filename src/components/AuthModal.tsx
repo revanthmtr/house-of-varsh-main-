@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { X, Eye, EyeOff, ArrowLeft, MailCheck } from 'lucide-react';
-
 import { GoogleLogin } from '@react-oauth/google';
+import { resolveApiUrl } from '../utils/api';
 import './AuthModal.css';
 
 type Mode = 'login' | 'register' | 'forgot_password' | 'reset_password';
@@ -71,7 +71,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       }
       setLoading(true);
       try {
-        const res = await fetch('/api/auth/forgot-password', {
+        const res = await fetch(resolveApiUrl('/api/auth/forgot-password'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ email: email.trim().toLowerCase() }),
@@ -103,7 +103,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       }
       setLoading(true);
       try {
-        const res = await fetch('/api/auth/reset-password', {
+        const res = await fetch(resolveApiUrl('/api/auth/reset-password'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ token: resetToken, newPassword: password }),
@@ -122,7 +122,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     // Handle Login / Register
     setLoading(true);
     try {
-      const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
+      const endpoint = resolveApiUrl(mode === 'login' ? '/api/auth/login' : '/api/auth/register');
       const body: any = { email: email.trim().toLowerCase(), password };
       if (mode === 'register') body.name = name.trim();
 
@@ -158,7 +158,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     try {
       if (!credentialResponse.credential) throw new Error('Google sign-in did not return a credential.');
       
-      const res = await fetch('/api/auth/google', {
+      const res = await fetch(resolveApiUrl('/api/auth/google'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ credential: credentialResponse.credential }),
@@ -181,6 +181,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       setGLoading(false);
     }
   }, []);
+
 
   const isLoading = loading || gLoading;
 
