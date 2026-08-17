@@ -10,7 +10,7 @@ const PhotoGallery = () => {
       id: 'bridal',
       title: 'Bridal Couture Collection',
       tag: 'Handcrafted bridal lehengas & wedding sarees',
-      image: get('photo_gallery', 'photo_1_src', '/collection_bridal.jpg'),
+      image: get('photo_gallery', 'photo_1_src', '/house_of_varsh-2026-08-12/688713427_18071142515422704_1852034660631262620_n.jpg'),
       gridArea: 'bridal',
       alt: 'House of Varsh luxury bridal couture — handcrafted wedding lehengas and bridal sarees'
     },
@@ -18,7 +18,7 @@ const PhotoGallery = () => {
       id: 'saree',
       title: 'Premium Silk Sarees',
       tag: 'Banarasi, Kanjivaram & tissue silk',
-      image: get('photo_gallery', 'photo_2_src', '/collection_saree.jpg'),
+      image: get('photo_gallery', 'photo_2_src', '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'),
       gridArea: 'saree',
       alt: 'House of Varsh premium silk saree collection — Banarasi, Kanjivaram, and tissue silk sarees'
     },
@@ -26,7 +26,7 @@ const PhotoGallery = () => {
       id: 'gown',
       title: 'Designer Evening Gowns',
       tag: 'Contemporary luxury eveningwear',
-      image: get('photo_gallery', 'photo_3_src', '/collection_gown.jpg'),
+      image: get('photo_gallery', 'photo_3_src', '/house_of_varsh-2026-08-12/689071500_18071142485422704_6264482426883037784_n.jpg'),
       gridArea: 'gown',
       alt: 'House of Varsh designer evening gowns — luxury contemporary Indian fashion'
     },
@@ -34,7 +34,7 @@ const PhotoGallery = () => {
       id: 'contemporary',
       title: 'Contemporary Ethnic Wear',
       tag: 'Modern Indo-western silhouettes',
-      image: get('photo_gallery', 'photo_4_src', '/collection_contemporary.jpg'),
+      image: get('photo_gallery', 'photo_4_src', '/house_of_varsh-2026-08-12/691885391_18071480576422704_2515087678437372300_n.jpg'),
       gridArea: 'contemporary',
       alt: 'House of Varsh contemporary ethnic wear — modern Indo-western designer fashion'
     },
@@ -42,7 +42,7 @@ const PhotoGallery = () => {
       id: 'festive',
       title: 'Festive & Wedding Collection',
       tag: 'Royal celebration wear',
-      image: get('photo_gallery', 'photo_5_src', '/collection_festive_lovable.jpg'),
+      image: get('photo_gallery', 'photo_5_src', '/house_of_varsh-2026-08-12/692840788_18071925344422704_6663684273133038371_n.jpg'),
       gridArea: 'festive',
       alt: 'House of Varsh festive collection — luxury wedding and celebration wear'
     },

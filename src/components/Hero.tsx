@@ -11,19 +11,19 @@ const Hero = () => {
 
   const slides = [
     { 
-      image: get('hero', 'slide_1_image', '/hero_fashion_1.png'), 
+      image: get('hero', 'slide_1_image', '/house_of_varsh-2026-08-12/683650085_18070177769422704_4642689253014659001_n.jpg'), 
       subtitle: get('hero', 'slide_1_subtitle', 'Handcrafted Luxury Couture'),   
       title: get('hero', 'slide_1_title', 'The Divine Collection'),
       alt: 'House of Varsh premium handcrafted silk saree from The Divine Collection'
     },
     { 
-      image: get('hero', 'slide_2_image', '/hero_slide_2.png'),                                                                                  
+      image: get('hero', 'slide_2_image', '/house_of_varsh-2026-08-12/687657173_18071142494422704_1421778732749517278_n.jpg'),                                                                                  
       subtitle: get('hero', 'slide_2_subtitle', 'Artisan Gold Embroidery'),     
       title: get('hero', 'slide_2_title', 'Golden Embroidery'),
       alt: 'House of Varsh designer lehenga with intricate golden zari embroidery'
     },
     { 
-      image: get('hero', 'slide_3_image', '/hero_slide_3.png'),                                                                                 
+      image: get('hero', 'slide_3_image', '/house_of_varsh-2026-08-12/687824056_18071480624422704_1700268466384918671_n.jpg'),                                                                                 
       subtitle: get('hero', 'slide_3_subtitle', 'Heritage Anarkali Collection'), 
       title: get('hero', 'slide_3_title', 'Emerald Shadows'),
       alt: 'House of Varsh heritage anarkali suit in emerald green silk'

@@ -3,29 +3,31 @@ import { motion } from 'framer-motion';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteContent } from '../context/SiteContentContext';
+import { DEFAULT_PRODUCTS, type Product } from '../data/defaultProducts';
 import './LatestCollection.css';
-
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  category: string;
-  img: string;
-  badge?: string;
-}
 
 const LatestCollection = () => {
   const [activeTab, setActiveTab] = useState('new');
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { addToCart } = useCart();
   const { get } = useSiteContent();
 
   useEffect(() => {
     fetch('/api/products')
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(console.error);
+      .then(res => {
+        if (!res.ok) throw new Error('API error');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setProducts(data);
+        }
+      })
+      .catch(() => {
+        // Fallback to official Instagram default products
+        setProducts(DEFAULT_PRODUCTS);
+      });
   }, []);
 
   const toggleWishlist = (id: number, e: React.MouseEvent) => {
