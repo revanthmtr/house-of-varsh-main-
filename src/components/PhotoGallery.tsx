@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useSiteContent } from '../context/SiteContentContext';
+import { resolveMediaUrl } from '../utils/api';
 import './PhotoGallery.css';
 
 const PhotoGallery = () => {
@@ -8,43 +9,43 @@ const PhotoGallery = () => {
   const collections = [
     {
       id: 'bridal',
-      title: 'Bridal Couture Collection',
-      tag: 'Handcrafted bridal lehengas & wedding sarees',
-      image: get('photo_gallery', 'photo_1_src', '/house_of_varsh-2026-08-12/688713427_18071142515422704_1852034660631262620_n.jpg'),
+      title: get('photo_gallery', 'photo_1_title', 'Bridal Couture Collection'),
+      tag: get('photo_gallery', 'photo_1_tag', 'Handcrafted bridal lehengas & wedding sarees'),
+      image: resolveMediaUrl(get('photo_gallery', 'photo_1_src', '/house_of_varsh-2026-08-12/688713427_18071142515422704_1852034660631262620_n.jpg')),
       gridArea: 'bridal',
-      alt: 'House of Varsh luxury bridal couture — handcrafted wedding lehengas and bridal sarees'
+      alt: get('photo_gallery', 'photo_1_alt', 'House of Varsh luxury bridal couture — handcrafted wedding lehengas and bridal sarees')
     },
     {
       id: 'saree',
-      title: 'Premium Silk Sarees',
-      tag: 'Banarasi, Kanjivaram & tissue silk',
-      image: get('photo_gallery', 'photo_2_src', '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'),
+      title: get('photo_gallery', 'photo_2_title', 'Premium Silk Sarees'),
+      tag: get('photo_gallery', 'photo_2_tag', 'Banarasi, Kanjivaram & tissue silk'),
+      image: resolveMediaUrl(get('photo_gallery', 'photo_2_src', '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg')),
       gridArea: 'saree',
-      alt: 'House of Varsh premium silk saree collection — Banarasi, Kanjivaram, and tissue silk sarees'
+      alt: get('photo_gallery', 'photo_2_alt', 'House of Varsh premium silk saree collection — Banarasi, Kanjivaram, and tissue silk sarees')
     },
     {
       id: 'gown',
-      title: 'Designer Evening Gowns',
-      tag: 'Contemporary luxury eveningwear',
-      image: get('photo_gallery', 'photo_3_src', '/house_of_varsh-2026-08-12/689071500_18071142485422704_6264482426883037784_n.jpg'),
+      title: get('photo_gallery', 'photo_3_title', 'Designer Evening Gowns'),
+      tag: get('photo_gallery', 'photo_3_tag', 'Contemporary luxury eveningwear'),
+      image: resolveMediaUrl(get('photo_gallery', 'photo_3_src', '/house_of_varsh-2026-08-12/689071500_18071142485422704_6264482426883037784_n.jpg')),
       gridArea: 'gown',
-      alt: 'House of Varsh designer evening gowns — luxury contemporary Indian fashion'
+      alt: get('photo_gallery', 'photo_3_alt', 'House of Varsh designer evening gowns — luxury contemporary Indian fashion')
     },
     {
       id: 'contemporary',
-      title: 'Contemporary Ethnic Wear',
-      tag: 'Modern Indo-western silhouettes',
-      image: get('photo_gallery', 'photo_4_src', '/house_of_varsh-2026-08-12/691885391_18071480576422704_2515087678437372300_n.jpg'),
+      title: get('photo_gallery', 'photo_4_title', 'Contemporary Ethnic Wear'),
+      tag: get('photo_gallery', 'photo_4_tag', 'Modern Indo-western silhouettes'),
+      image: resolveMediaUrl(get('photo_gallery', 'photo_4_src', '/house_of_varsh-2026-08-12/691885391_18071480576422704_2515087678437372300_n.jpg')),
       gridArea: 'contemporary',
-      alt: 'House of Varsh contemporary ethnic wear — modern Indo-western designer fashion'
+      alt: get('photo_gallery', 'photo_4_alt', 'House of Varsh contemporary ethnic wear — modern Indo-western designer fashion')
     },
     {
       id: 'festive',
-      title: 'Festive & Wedding Collection',
-      tag: 'Royal celebration wear',
-      image: get('photo_gallery', 'photo_5_src', '/house_of_varsh-2026-08-12/692840788_18071925344422704_6663684273133038371_n.jpg'),
+      title: get('photo_gallery', 'photo_5_title', 'Festive & Wedding Collection'),
+      tag: get('photo_gallery', 'photo_5_tag', 'Royal celebration wear'),
+      image: resolveMediaUrl(get('photo_gallery', 'photo_5_src', '/house_of_varsh-2026-08-12/692840788_18071925344422704_6663684273133038371_n.jpg')),
       gridArea: 'festive',
-      alt: 'House of Varsh festive collection — luxury wedding and celebration wear'
+      alt: get('photo_gallery', 'photo_5_alt', 'House of Varsh festive collection — luxury wedding and celebration wear')
     },
   ];
 
@@ -63,15 +64,15 @@ const PhotoGallery = () => {
           <div className="fc-header-left">
             <div className="fc-eyebrow">
               <span className="fc-eyebrow-line" />
-              <span className="fc-eyebrow-text">Shop by Category — Luxury Fashion Collections</span>
+              <span className="fc-eyebrow-text">{get('photo_gallery', 'eyebrow_text', 'Shop by Category — Luxury Fashion Collections')}</span>
               <span className="fc-eyebrow-line" />
             </div>
             <h2 className="fc-title">
-              Shop Our <span className="fc-title-italic">Luxury Collections</span>
+              {get('photo_gallery', 'section_title_prefix', 'Shop Our')} <span className="fc-title-italic">{get('photo_gallery', 'section_title_highlight', 'Luxury Collections')}</span>
             </h2>
           </div>
           <a href="#collections" className="fc-view-all" aria-label="Browse all House of Varsh luxury saree and couture collections">
-            Shop All Collections →
+            {get('photo_gallery', 'view_all_label', 'Shop All Collections →')}
           </a>
         </motion.div>
 
@@ -87,7 +88,6 @@ const PhotoGallery = () => {
               viewport={{ once: true, margin: '200px' }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
             >
-
               {col.image.endsWith('.mp4') || col.image.endsWith('.webm') || col.image.endsWith('.mov') ? (
                 <video src={col.image} autoPlay loop muted playsInline preload="metadata" className="fc-card__img" style={{ objectFit: 'cover' }} />
               ) : (
@@ -118,3 +118,4 @@ const PhotoGallery = () => {
 };
 
 export default PhotoGallery;
+

@@ -11,15 +11,15 @@ const getSiteContent = async () => {
 };
 
 const updateSiteContent = async (section, key, value) => {
-  const result = await queryRun(
-    `UPDATE site_content SET value = ?, updated_at = datetime('now') WHERE section = ? AND key = ?`,
-    [value, section, key]
+  await queryRun(
+    `INSERT INTO site_content (section, key, value, type, updated_at)
+     VALUES (?, ?, ?, 'text', datetime('now'))
+     ON CONFLICT(section, key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')`,
+    [section, key, value]
   );
-  if (result.changes === 0) {
-    throw { status: 404, message: 'Content field not found' };
-  }
   return { success: true, section, key, value };
 };
+
 
 // Bulk-update every field in a section in one call (used by the admin panel's
 // "Save Section" button, which sends only the fields that actually changed).

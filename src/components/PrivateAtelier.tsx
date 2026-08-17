@@ -29,7 +29,7 @@ const PrivateAtelier = () => {
           <div className="pa-card-frame-outer">
             <div className="pa-card-frame-inner">
               <div className="pa-card-content">
-                <span className="pa-subtitle">Exclusive Luxury Fashion Preview</span>
+                <span className="pa-subtitle">{get('private_atelier', 'subtitle', 'Exclusive Luxury Fashion Preview')}</span>
                 
                 {/* Heading */}
                 <h2 className="pa-title">
@@ -48,7 +48,7 @@ const PrivateAtelier = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email for exclusive access"
+                        placeholder={get('private_atelier', 'placeholder', 'Enter your email for exclusive access')}
                         className="pa-input"
                         required
                         aria-label="Email address for luxury fashion newsletter"
@@ -66,9 +66,10 @@ const PrivateAtelier = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6 }}
                   >
-                    Welcome to the House of Varsh inner circle. You'll be first to see our newest luxury collections.
+                    {get('private_atelier', 'success_message', "Welcome to the House of Varsh inner circle. You'll be first to see our newest luxury collections.")}
                   </motion.p>
                 )}
+
 
                 <p className="pa-legal">
                   {get('private_atelier', 'legal_text', 'By subscribing you accept our privacy policy. Unsubscribe anytime. We never share your information.')}

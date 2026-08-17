@@ -1,31 +1,35 @@
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
+import { useSiteContent } from '../context/SiteContentContext';
+import { resolveMediaUrl } from '../utils/api';
 import './VoicesMuses.css';
 
 const VoicesMuses = () => {
+  const { get } = useSiteContent();
+
   const muses = [
     {
       id: 1,
-      name: 'Shreya Sen',
-      role: 'Luxury Fashion Connoisseur · Mumbai',
-      avatar: '/editorial_2.png',
-      quote: '"Wearing House of Varsh silk sarees is like wearing poetry. The drape of the tissue silk, the sheer weightless sheen, and the rich hand-embroidered gold borders — it\'s modern royalty redefined. Best luxury saree brand in India."',
+      name: get('voices_muses', 'muse_1_name', 'Shreya Sen'),
+      role: get('voices_muses', 'muse_1_role', 'Luxury Fashion Connoisseur · Mumbai'),
+      avatar: resolveMediaUrl(get('voices_muses', 'muse_1_avatar', '/editorial_2.png')),
+      quote: get('voices_muses', 'muse_1_quote', '"Wearing House of Varsh silk sarees is like wearing poetry. The drape of the tissue silk, the sheer weightless sheen, and the rich hand-embroidered gold borders — it\'s modern royalty redefined. Best luxury saree brand in India."'),
       rating: 5
     },
     {
       id: 2,
-      name: 'Dia Mehta',
-      role: 'Bride · New Delhi',
-      avatar: '/editorial_3.png',
-      quote: '"The craftsmanship of my House of Varsh bridal lehenga was absolutely unparalleled. The Heritage Bridal Couture collection is a masterpiece — intricate zari embroidery and premium Banarasi silk that drew admiration from every wedding guest."',
+      name: get('voices_muses', 'muse_2_name', 'Dia Mehta'),
+      role: get('voices_muses', 'muse_2_role', 'Bride · New Delhi'),
+      avatar: resolveMediaUrl(get('voices_muses', 'muse_2_avatar', '/editorial_3.png')),
+      quote: get('voices_muses', 'muse_2_quote', '"The craftsmanship of my House of Varsh bridal lehenga was absolutely unparalleled. The Heritage Bridal Couture collection is a masterpiece — intricate zari embroidery and premium Banarasi silk that drew admiration from every wedding guest."'),
       rating: 5
     },
     {
       id: 3,
-      name: 'Kiara R.',
-      role: 'Fashion Stylist · Bangalore',
-      avatar: '/editorial_4.png',
-      quote: '"Unapologetically bold and breathtakingly elegant. Their deep plum and wine designer sarees are absolute landmarks of classic zari weaving. A must-have luxury wardrobe staple for any fashion-forward Indian woman."',
+      name: get('voices_muses', 'muse_3_name', 'Kiara R.'),
+      role: get('voices_muses', 'muse_3_role', 'Fashion Stylist · Bangalore'),
+      avatar: resolveMediaUrl(get('voices_muses', 'muse_3_avatar', '/editorial_4.png')),
+      quote: get('voices_muses', 'muse_3_quote', '"Unapologetically bold and breathtakingly elegant. Their deep plum and wine designer sarees are absolute landmarks of classic zari weaving. A must-have luxury wardrobe staple for any fashion-forward Indian woman."'),
       rating: 5
     }
   ];
@@ -34,8 +38,8 @@ const VoicesMuses = () => {
     <section className="section voices-muses" id="muses" aria-label="Customer Reviews — What Clients Say About House of Varsh Luxury Sarees and Couture">
       <div className="container">
         <div className="section-header text-center">
-          <span className="section-subtitle">Trusted by Fashion Connoisseurs Across India</span>
-          <h2 className="section-title">Client Reviews & Testimonials</h2>
+          <span className="section-subtitle">{get('voices_muses', 'section_subtitle', 'Trusted by Fashion Connoisseurs Across India')}</span>
+          <h2 className="section-title">{get('voices_muses', 'section_title', 'Client Reviews & Testimonials')}</h2>
         </div>
 
         <div className="muses-grid" itemScope itemType="https://schema.org/Product">
@@ -46,17 +50,17 @@ const VoicesMuses = () => {
             <meta itemProp="bestRating" content="5" />
             <meta itemProp="ratingCount" content="3" />
           </div>
-          {muses.map((muse, index) => (
+          {muses.map((muse) => (
             <motion.div 
               key={muse.id}
               className="muse-card glass-dark"
               itemProp="review"
               itemScope
               itemType="https://schema.org/Review"
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0.9, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.8, delay: index * 0.15, ease: [0.25, 1, 0.5, 1] }}
+              viewport={{ once: true, margin: "200px" }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             >
               <div className="muse-stars" itemProp="reviewRating" itemScope itemType="https://schema.org/Rating">
                 <meta itemProp="ratingValue" content={String(muse.rating)} />
@@ -86,3 +90,4 @@ const VoicesMuses = () => {
 };
 
 export default VoicesMuses;
+

@@ -9,21 +9,21 @@ const BrandStory = () => {
   const pillars = [
     {
       icon: Award,
-      title: '15+ Years of Master Artisan Craftsmanship',
-      subtitle: 'Heritage Handloom Excellence',
-      desc: 'Every House of Varsh saree is handwoven by master artisans with over 15 years of expertise in Banarasi silk, Kanjivaram weaving, and bespoke embroidery — preserving India\'s rich textile heritage.',
+      title: get('brand_story', 'pillar_1_title', '15+ Years of Master Artisan Craftsmanship'),
+      subtitle: get('brand_story', 'pillar_1_subtitle', 'Heritage Handloom Excellence'),
+      desc: get('brand_story', 'pillar_1_desc', 'Every House of Varsh saree is handwoven by master artisans with over 15 years of expertise in Banarasi silk, Kanjivaram weaving, and bespoke embroidery — preserving India\'s rich textile heritage.'),
     },
     {
       icon: Sparkles,
-      title: 'Luxury Couture, Reimagined for Modern India',
-      subtitle: 'Designer Runway Elegance',
-      desc: 'From bridal lehengas to contemporary organza drapes — our haute couture collections blend traditional Indian craftsmanship with runway-ready silhouettes that define modern luxury fashion.',
+      title: get('brand_story', 'pillar_2_title', 'Luxury Couture, Reimagined for Modern India'),
+      subtitle: get('brand_story', 'pillar_2_subtitle', 'Designer Runway Elegance'),
+      desc: get('brand_story', 'pillar_2_desc', 'From bridal lehengas to contemporary organza drapes — our haute couture collections blend traditional Indian craftsmanship with runway-ready silhouettes that define modern luxury fashion.'),
     },
     {
       icon: Compass,
-      title: 'Empowering the Modern Indian Woman',
-      subtitle: 'Confidence Through Couture',
-      desc: 'House of Varsh designs for strong, confident women who celebrate their heritage. Each piece embodies sovereignty, grace, and unapologetic elegance for every occasion — from weddings to soirées.',
+      title: get('brand_story', 'pillar_3_title', 'Empowering the Modern Indian Woman'),
+      subtitle: get('brand_story', 'pillar_3_subtitle', 'Confidence Through Couture'),
+      desc: get('brand_story', 'pillar_3_desc', 'House of Varsh designs for strong, confident women who celebrate their heritage. Each piece embodies sovereignty, grace, and unapologetic elegance for every occasion — from weddings to soirées.'),
     },
   ];
 
@@ -77,10 +77,11 @@ const BrandStory = () => {
           </h2>
 
           <div className="story-founder-tag">
-            <span className="founder-name" itemProp="name">HOUSE OF VARSH ATELIER</span>
-            <span className="founder-title" itemProp="location">India · Worldwide Shipping</span>
+            <span className="founder-name" itemProp="name">{get('brand_story', 'founder_tag_name', 'HOUSE OF VARSH ATELIER')}</span>
+            <span className="founder-title" itemProp="location">{get('brand_story', 'founder_tag_location', 'India · Worldwide Shipping')}</span>
           </div>
         </motion.div>
+
 
         {/* 3 Pillars Grid Presentation */}
         <div className="story-pillars-grid" role="list" aria-label="Our brand pillars — heritage, luxury, and empowerment">
