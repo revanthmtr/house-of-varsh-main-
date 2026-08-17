@@ -110,9 +110,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const cartTotal = cart.reduce((total, item) => {
-    const p = parseFloat(item.price.replace(/[$,]/g, ''));
+    const p = parseFloat(String(item.price).replace(/[^0-9.]/g, ''));
     return total + (isNaN(p) ? 0 : p);
   }, 0);
+
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, checkout, isCartOpen, setIsCartOpen, cartTotal }}>
