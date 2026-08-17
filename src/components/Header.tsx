@@ -127,19 +127,22 @@ const Header = () => {
 
                 <div className="user-dropdown-divider" />
 
-                {/* My Orders */}
-                <button className="user-dropdown-item" onClick={handleOpenOrders}>
-                  <Package size={15} />
-                  <span>My Orders</span>
-                </button>
+                {/* My Orders — Only for regular customers */}
+                {user.role !== 'admin' && (
+                  <button className="user-dropdown-item" onClick={handleOpenOrders}>
+                    <Package size={15} />
+                    <span>My Orders</span>
+                  </button>
+                )}
 
-                {/* Admin Panel link — only for admins */}
+                {/* Admin Panel link — Only for admins */}
                 {user.role === 'admin' && (
                   <button className="user-dropdown-item" onClick={handleOpenAdmin}>
                     <LayoutDashboard size={15} />
                     <span>Admin Panel</span>
                   </button>
                 )}
+
 
                 {/* Logout */}
                 <button className="user-dropdown-item logout" onClick={handleLogout}>
@@ -210,16 +213,19 @@ const Header = () => {
                   <span className="mobile-user-email">{user.email}</span>
                   {user.role === 'admin' && <span className="mobile-admin-badge">Admin</span>}
                 </div>
-                <button className="mobile-btn-action" onClick={handleOpenOrders}>
-                  <Package size={16} />
-                  <span>My Orders</span>
-                </button>
+                {user.role !== 'admin' && (
+                  <button className="mobile-btn-action" onClick={handleOpenOrders}>
+                    <Package size={16} />
+                    <span>My Orders</span>
+                  </button>
+                )}
                 {user.role === 'admin' && (
                   <button className="mobile-btn-action" onClick={handleOpenAdmin}>
                     <LayoutDashboard size={16} />
                     <span>Admin Panel</span>
                   </button>
                 )}
+
                 <button className="mobile-btn-action logout" onClick={handleLogout}>
                   <LogOut size={16} />
                   <span>Sign Out</span>

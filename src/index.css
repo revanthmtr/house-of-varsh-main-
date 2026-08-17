@@ -185,49 +185,76 @@ button {
   transform: scale(1);
 }
 
-/* Premium Fashion Cursor */
+/* Premium Fashion Haute Couture Cursor — Adaptive Across All Shades */
 .cursor-dot {
   position: fixed;
   top: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  background-color: #000000;
+  width: 10px;
+  height: 10px;
+  background-color: #D4AF37;
   border-radius: 50%;
   pointer-events: none;
-  z-index: 100000;
+  z-index: 100001;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.9), 0 0 2px #FFFFFF;
+  transition: opacity 0.25s ease, width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
   will-change: transform, opacity;
-  transform: translateZ(0); /* Hardware accelerate */
+  transform: translateZ(0);
 }
 
 .cursor-ring {
   position: fixed;
   top: 0;
   left: 0;
-  width: 40px;
-  height: 40px;
-  border: 1.5px solid #000000;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(212, 175, 55, 0.8);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 99999;
+  z-index: 100000;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.35), inset 0 0 6px rgba(212, 175, 55, 0.15);
+  transition: opacity 0.25s ease, border-color 0.2s ease, background-color 0.25s ease, width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
   transform: translateZ(0);
+}
+
+/* Interactive Hover States */
+.cursor-ring.cursor-hover {
+  width: 52px;
+  height: 52px;
+  border-color: #F3E5AB;
+  background: rgba(212, 175, 55, 0.12);
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.6), inset 0 0 10px rgba(212, 175, 55, 0.25);
+}
+
+.cursor-dot.cursor-hover {
+  width: 14px;
+  height: 14px;
+  background-color: #F3E5AB;
+  box-shadow: 0 0 16px rgba(243, 229, 171, 1), 0 0 4px #FFFFFF;
+}
+
+.cursor-ring.cursor-active {
+  transform: scale(0.82) translateZ(0);
+  background: rgba(212, 175, 55, 0.25);
 }
 
 body:hover .cursor-dot, body:hover .cursor-ring {
   opacity: 1;
 }
 
-/* Hide default cursor only if custom is active */
+/* Hide default cursor only if custom fine pointer is active */
 @media (hover: hover) and (pointer: fine) {
   body {
     cursor: none;
   }
+  a, button, input, select, textarea, [role="button"] {
+    cursor: none !important;
+  }
 }
+
 
 /* ── Luxury Glow & Overlay Utilities ── */
 .text-gradient-gold {

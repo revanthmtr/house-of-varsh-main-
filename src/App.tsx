@@ -22,24 +22,57 @@ const CustomCursor = () => {
   const ringX = useMotionValue(-100);
   const ringY = useMotionValue(-100);
 
-  const springConfig = { damping: 28, stiffness: 400, mass: 0.1 };
-  const cursorXSpring = useSpring(cursorX, springConfig);
-  const cursorYSpring = useSpring(cursorY, springConfig);
+  // High-performance, zero-latency springs
+  const dotSpringConfig = { damping: 40, stiffness: 1000, mass: 0.04 };
+  const cursorXSpring = useSpring(cursorX, dotSpringConfig);
+  const cursorYSpring = useSpring(cursorY, dotSpringConfig);
   
-  const ringConfig = { damping: 35, stiffness: 200, mass: 0.3 };
-  const ringXSpring = useSpring(ringX, ringConfig);
-  const ringYSpring = useSpring(ringY, ringConfig);
+  const ringSpringConfig = { damping: 28, stiffness: 480, mass: 0.08 };
+  const ringXSpring = useSpring(ringX, ringSpringConfig);
+  const ringYSpring = useSpring(ringY, ringSpringConfig);
 
   useEffect(() => {
+    let isHoveringInteractive = false;
+    const dotElem = document.querySelector('.cursor-dot');
+    const ringElem = document.querySelector('.cursor-ring');
+
     const moveCursor = (e: MouseEvent) => {
-      cursorX.set(e.clientX - 6);
-      cursorY.set(e.clientY - 6);
-      ringX.set(e.clientX - 20);
-      ringY.set(e.clientY - 20);
+      cursorX.set(e.clientX - 5);
+      cursorY.set(e.clientY - 5);
+      ringX.set(e.clientX - 18);
+      ringY.set(e.clientY - 18);
+
+      const target = e.target as HTMLElement | null;
+      const isInteractive = !!target?.closest('a, button, input, textarea, select, [role="button"], .product-card, .fc-card, .tab, .wishlist-btn, .header-icon, .user-avatar-btn');
+      
+      if (isInteractive !== isHoveringInteractive) {
+        isHoveringInteractive = isInteractive;
+        if (isInteractive) {
+          ringElem?.classList.add('cursor-hover');
+          dotElem?.classList.add('cursor-hover');
+        } else {
+          ringElem?.classList.remove('cursor-hover');
+          dotElem?.classList.remove('cursor-hover');
+        }
+      }
     };
 
-    window.addEventListener('mousemove', moveCursor);
-    return () => window.removeEventListener('mousemove', moveCursor);
+    const handleMouseDown = () => {
+      ringElem?.classList.add('cursor-active');
+    };
+    const handleMouseUp = () => {
+      ringElem?.classList.remove('cursor-active');
+    };
+
+    window.addEventListener('mousemove', moveCursor, { passive: true });
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', moveCursor);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
   }, [cursorX, cursorY, ringX, ringY]);
 
   return (
@@ -55,6 +88,7 @@ const CustomCursor = () => {
     </>
   );
 };
+
 
 // ── Google One Tap — fires automatically for unauthenticated visitors ──────────
 const GoogleOneTap = () => {
