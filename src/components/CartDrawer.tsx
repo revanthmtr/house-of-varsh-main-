@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -14,6 +15,17 @@ const CartDrawer: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+
+  // Lock background scroll when cart drawer is open
+  useEffect(() => {
+    if (isCartOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isCartOpen]);
 
   const closeAndReset = () => {
     setIsCartOpen(false);
@@ -43,6 +55,7 @@ const CartDrawer: React.FC = () => {
       setError(result.error || 'Something went wrong. Please try again.');
     }
   };
+
 
   return (
     <AnimatePresence>
@@ -118,75 +131,89 @@ const CartDrawer: React.FC = () => {
 
             {/* Step 2: Shipping form */}
             {step === 'shipping' && (
-              <form className="cart-content cart-shipping-form" onSubmit={handlePlaceOrder}>
-                {error && <div className="cart-form-error">&#9888; {error}</div>}
+              <form
+                className="cart-form-wrapper"
+                onSubmit={handlePlaceOrder}
+                style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}
+              >
+                <div
+                  className="cart-content cart-shipping-form"
+                  data-lenis-prevent
+                  style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}
+                >
+                  {error && <div className="cart-form-error">&#9888; {error}</div>}
 
-                <label className="cart-form-label">Full Name *</label>
-                <input
-                  className="cart-form-input"
-                  value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
-                  placeholder="Your full name"
-                  disabled={loading}
-                />
+                  <label className="cart-form-label">Full Name *</label>
+                  <input
+                    className="cart-form-input"
+                    value={form.name}
+                    onChange={e => setForm({ ...form, name: e.target.value })}
+                    placeholder="Your full name"
+                    disabled={loading}
+                    required
+                  />
 
-                <label className="cart-form-label">Phone Number *</label>
-                <input
-                  className="cart-form-input"
-                  value={form.phone}
-                  onChange={e => setForm({ ...form, phone: e.target.value })}
-                  placeholder="10-digit mobile number"
-                  disabled={loading}
-                />
+                  <label className="cart-form-label">Phone Number *</label>
+                  <input
+                    className="cart-form-input"
+                    value={form.phone}
+                    onChange={e => setForm({ ...form, phone: e.target.value })}
+                    placeholder="10-digit mobile number"
+                    disabled={loading}
+                    required
+                  />
 
-                <label className="cart-form-label">Delivery Address *</label>
-                <textarea
-                  className="cart-form-input cart-form-textarea"
-                  value={form.address}
-                  onChange={e => setForm({ ...form, address: e.target.value })}
-                  placeholder="House no., street, area"
-                  disabled={loading}
-                  rows={3}
-                />
+                  <label className="cart-form-label">Delivery Address *</label>
+                  <textarea
+                    className="cart-form-input cart-form-textarea"
+                    value={form.address}
+                    onChange={e => setForm({ ...form, address: e.target.value })}
+                    placeholder="House no., street, area"
+                    disabled={loading}
+                    rows={3}
+                    required
+                  />
 
-                <div className="cart-form-row">
-                  <div>
-                    <label className="cart-form-label">City</label>
-                    <input
-                      className="cart-form-input"
-                      value={form.city}
-                      onChange={e => setForm({ ...form, city: e.target.value })}
-                      placeholder="City"
-                      disabled={loading}
-                    />
+                  <div className="cart-form-row">
+                    <div>
+                      <label className="cart-form-label">City</label>
+                      <input
+                        className="cart-form-input"
+                        value={form.city}
+                        onChange={e => setForm({ ...form, city: e.target.value })}
+                        placeholder="City"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="cart-form-label">Pincode</label>
+                      <input
+                        className="cart-form-input"
+                        value={form.pincode}
+                        onChange={e => setForm({ ...form, pincode: e.target.value })}
+                        placeholder="Pincode"
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="cart-form-label">Pincode</label>
-                    <input
-                      className="cart-form-input"
-                      value={form.pincode}
-                      onChange={e => setForm({ ...form, pincode: e.target.value })}
-                      placeholder="Pincode"
-                      disabled={loading}
-                    />
+
+                  <label className="cart-form-label">Order Notes (optional)</label>
+                  <textarea
+                    className="cart-form-input cart-form-textarea"
+                    value={form.notes}
+                    onChange={e => setForm({ ...form, notes: e.target.value })}
+                    placeholder="Any special instructions"
+                    disabled={loading}
+                    rows={2}
+                  />
+
+                  <div className="cart-payment-note">
+                    Payment: <strong>Cash on Delivery</strong> &mdash; pay when your order arrives.
                   </div>
                 </div>
 
-                <label className="cart-form-label">Order Notes (optional)</label>
-                <textarea
-                  className="cart-form-input cart-form-textarea"
-                  value={form.notes}
-                  onChange={e => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Any special instructions"
-                  disabled={loading}
-                  rows={2}
-                />
-
-                <div className="cart-payment-note">
-                  Payment: <strong>Cash on Delivery</strong> &mdash; pay when your order arrives.
-                </div>
-
-                <div className="cart-footer" style={{ padding: '1.5rem 0 0' }}>
+                {/* Pinned Footer — Always 100% visible on screen */}
+                <div className="cart-footer" style={{ flexShrink: 0, borderTop: '1px solid rgba(18,18,18,0.1)' }}>
                   <div className="cart-total">
                     <span>Total</span>
                     <span>&#8377;{cartTotal.toLocaleString('en-IN')}</span>
@@ -200,7 +227,7 @@ const CartDrawer: React.FC = () => {
 
             {/* Step 3: Confirmation */}
             {step === 'confirmed' && (
-              <div className="cart-content cart-confirmation">
+              <div className="cart-content cart-confirmation" data-lenis-prevent>
                 <CheckCircle2 size={56} className="cart-confirm-icon" />
                 <h3>Thank you!</h3>
                 <p>
@@ -220,3 +247,4 @@ const CartDrawer: React.FC = () => {
 };
 
 export default CartDrawer;
+
