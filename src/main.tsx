@@ -5,7 +5,12 @@ import './index.css'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
 // ── Global API URL Routing for Production Hosting (GoDaddy / Render) ────────
-const API_URL = (import.meta.env.VITE_API_URL || '').trim();
+const API_URL = (
+  (import.meta.env.VITE_API_URL || '').trim() ||
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? 'https://house-of-varsh-api.onrender.com'
+    : '')
+).trim();
 
 if (API_URL && typeof window !== 'undefined') {
   const originalFetch = window.fetch;
@@ -22,6 +27,7 @@ if (API_URL && typeof window !== 'undefined') {
     return originalFetch.call(this, input, init);
   };
 }
+
 
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
