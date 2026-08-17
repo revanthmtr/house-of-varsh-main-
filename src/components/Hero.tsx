@@ -142,8 +142,9 @@ const Hero = () => {
 
       <div className="hero-indicators" role="tablist" aria-label="Slide navigation">
         {slides.map((_, idx) => (
-          <div 
+          <button 
             key={idx} 
+            type="button"
             role="tab"
             aria-selected={idx === currentSlide}
             aria-label={`View slide ${idx + 1}`}
@@ -151,9 +152,10 @@ const Hero = () => {
             onClick={() => setCurrentSlide(idx)}
           >
             <div className="hero-indicator-line" />
-          </div>
+          </button>
         ))}
       </div>
+
     </section>
   );
 };

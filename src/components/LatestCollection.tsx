@@ -79,20 +79,26 @@ const LatestCollection = () => {
 
           <div className="tabs" role="tablist" aria-label="Browse luxury saree collections by category">
             {COLLECTION_TABS.map((tab) => (
-              <div
+              <button
                 key={tab.id}
+                type="button"
+                role="tab"
+                id={`tab-${tab.id}`}
+                aria-selected={activeTab === tab.id}
+                aria-controls="product-catalog-grid"
                 className={`tab ${activeTab === tab.id ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
               >
                 {tab.label}
-              </div>
+              </button>
             ))}
           </div>
         </div>
 
 
         <div className="collection-layout">
-          <div className="product-grid">
+          <div className="product-grid" id="product-catalog-grid" role="region" aria-labelledby={`tab-${activeTab}`}>
+
             {filteredProducts.map((product) => (
               <motion.div
                 className="product-card"
