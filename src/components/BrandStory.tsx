@@ -9,30 +9,30 @@ const BrandStory = () => {
   const pillars = [
     {
       icon: Award,
-      title: '15+ Years of Mastery',
-      subtitle: 'Heritage Craftsmanship',
-      desc: 'Over a decade of refining hand-woven silks, artisanal embroidery, and bespoke silhouettes.',
+      title: '15+ Years of Master Artisan Craftsmanship',
+      subtitle: 'Heritage Handloom Excellence',
+      desc: 'Every House of Varsh saree is handwoven by master artisans with over 15 years of expertise in Banarasi silk, Kanjivaram weaving, and bespoke embroidery — preserving India\'s rich textile heritage.',
     },
     {
       icon: Sparkles,
-      title: 'High Couture, Reimagined',
-      subtitle: 'Runway Elegance',
-      desc: 'High-fashion inspired drapes crafted with royal splendor—democratizing haute couture.',
+      title: 'Luxury Couture, Reimagined for Modern India',
+      subtitle: 'Designer Runway Elegance',
+      desc: 'From bridal lehengas to contemporary organza drapes — our haute couture collections blend traditional Indian craftsmanship with runway-ready silhouettes that define modern luxury fashion.',
     },
     {
       icon: Compass,
-      title: 'Unapologetic Sovereignty',
-      subtitle: 'For the Modern Woman',
-      desc: 'Embodying young, prosperous grace for strong, confident women who define their own legacy.',
+      title: 'Empowering the Modern Indian Woman',
+      subtitle: 'Confidence Through Couture',
+      desc: 'House of Varsh designs for strong, confident women who celebrate their heritage. Each piece embodies sovereignty, grace, and unapologetic elegance for every occasion — from weddings to soirées.',
     },
   ];
 
   return (
-    <section className="brand-story" id="story">
+    <section className="brand-story" id="story" aria-label="About House of Varsh — Our Heritage and Craftsmanship Story" itemScope itemType="https://schema.org/AboutPage">
       <div className="story-glow" />
       <div className="story-glow-2" />
 
-      <div className="container story-manifesto-container">
+      <article className="container story-manifesto-container">
         {/* Eyebrow & Brand Crest */}
         <motion.div
           className="story-header text-center"
@@ -44,7 +44,7 @@ const BrandStory = () => {
           <div className="story-eyebrow-wrap">
             <span className="story-line" />
             <span className="story-eyebrow-text">
-              {get('brand_story', 'eyebrow_text', 'MAISON DE COUTURE · ATELIER MANIFESTO')}
+              {get('brand_story', 'eyebrow_text', 'LUXURY INDIAN COUTURE · HERITAGE CRAFTSMANSHIP')}
             </span>
             <span className="story-line" />
           </div>
@@ -52,8 +52,11 @@ const BrandStory = () => {
           <div className="story-logo-hero-wrap">
             <img
               src={get('header', 'logo_src', '/chinni_logo.png')}
-              alt="House of Varsh Logo"
+              alt="House of Varsh — Premium Luxury Indian Fashion Brand Logo"
               className="story-hero-logo"
+              width="200"
+              height="80"
+              loading="lazy"
             />
           </div>
         </motion.div>
@@ -65,35 +68,38 @@ const BrandStory = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, delay: 0.2 }}
+          itemScope
+          itemType="https://schema.org/CreativeWork"
         >
-          <div className="story-quote-symbol">“</div>
-          <p className="story-lead-paragraph">
-            {get('brand_story', 'story_paragraph', "At House of Varsh, we're not just another fashion brand—we're a movement, roaring to redefine how sarees are worn and celebrated. Choose House of Varsh's High fashion inspired sarees: young, prosperous, and crafted for women who are strong, confident, and unapologetic.")}
-          </p>
+          <div className="story-quote-symbol" aria-hidden="true">"</div>
+          <h2 className="story-lead-paragraph" itemProp="description">
+            {get('brand_story', 'story_paragraph', "House of Varsh is India's premier luxury couture brand — a movement redefining how sarees, lehengas, and ethnic wear are designed, worn, and celebrated. Our high-fashion inspired collections feature premium handcrafted silk sarees, designer bridal lehengas, and contemporary ethnic wear — crafted for women who are strong, confident, and unapologetically elegant.")}
+          </h2>
 
           <div className="story-founder-tag">
-            <span className="founder-name">HOUSE OF VARSH ATELIER</span>
-            <span className="founder-title">Mumbai · Paris · Worldwide</span>
+            <span className="founder-name" itemProp="name">HOUSE OF VARSH ATELIER</span>
+            <span className="founder-title" itemProp="location">India · Worldwide Shipping</span>
           </div>
         </motion.div>
 
         {/* 3 Pillars Grid Presentation */}
-        <div className="story-pillars-grid">
+        <div className="story-pillars-grid" role="list" aria-label="Our brand pillars — heritage, luxury, and empowerment">
           {pillars.map((item, idx) => {
             const Icon = item.icon;
             return (
               <motion.div
                 key={idx}
                 className="story-pillar-card"
+                role="listitem"
                 initial={{ opacity: 0, y: 35 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.3 + idx * 0.15 }}
               >
-                <div className="pillar-icon-box">
+                <div className="pillar-icon-box" aria-hidden="true">
                   <Icon size={22} />
                 </div>
-                <h4 className="pillar-title">{item.title}</h4>
+                <h3 className="pillar-title">{item.title}</h3>
                 <div className="pillar-subtitle">{item.subtitle}</div>
                 <p className="pillar-desc">{item.desc}</p>
               </motion.div>
@@ -111,14 +117,16 @@ const BrandStory = () => {
         >
           <button
             className="btn-solid-gold"
+            aria-label="Discover our luxury saree, lehenga, and bridal couture collections"
             onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            {get('brand_story', 'cta_button_label', 'DISCOVER OUR COLLECTIONS')}
+            {get('brand_story', 'cta_button_label', 'SHOP LUXURY COLLECTIONS')}
           </button>
         </motion.div>
-      </div>
+      </article>
     </section>
   );
 };
 
 export default BrandStory;
+

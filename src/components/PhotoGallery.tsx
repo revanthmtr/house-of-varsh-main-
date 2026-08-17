@@ -8,43 +8,48 @@ const PhotoGallery = () => {
   const collections = [
     {
       id: 'bridal',
-      title: 'Bridal Couture',
-      tag: 'Heirloom craft',
+      title: 'Bridal Couture Collection',
+      tag: 'Handcrafted bridal lehengas & wedding sarees',
       image: get('photo_gallery', 'photo_1_src', '/collection_bridal.jpg'),
       gridArea: 'bridal',
+      alt: 'House of Varsh luxury bridal couture — handcrafted wedding lehengas and bridal sarees'
     },
     {
       id: 'saree',
-      title: 'Luxury Sarees',
-      tag: 'Drape of dreams',
+      title: 'Premium Silk Sarees',
+      tag: 'Banarasi, Kanjivaram & tissue silk',
       image: get('photo_gallery', 'photo_2_src', '/collection_saree.jpg'),
       gridArea: 'saree',
+      alt: 'House of Varsh premium silk saree collection — Banarasi, Kanjivaram, and tissue silk sarees'
     },
     {
       id: 'gown',
-      title: 'Evening Gowns',
-      tag: 'After-dark elegance',
+      title: 'Designer Evening Gowns',
+      tag: 'Contemporary luxury eveningwear',
       image: get('photo_gallery', 'photo_3_src', '/collection_gown.jpg'),
       gridArea: 'gown',
+      alt: 'House of Varsh designer evening gowns — luxury contemporary Indian fashion'
     },
     {
       id: 'contemporary',
-      title: 'Contemporary',
-      tag: 'Modern silhouettes',
+      title: 'Contemporary Ethnic Wear',
+      tag: 'Modern Indo-western silhouettes',
       image: get('photo_gallery', 'photo_4_src', '/collection_contemporary.jpg'),
       gridArea: 'contemporary',
+      alt: 'House of Varsh contemporary ethnic wear — modern Indo-western designer fashion'
     },
     {
       id: 'festive',
-      title: 'Festive',
-      tag: 'Royal celebration',
+      title: 'Festive & Wedding Collection',
+      tag: 'Royal celebration wear',
       image: get('photo_gallery', 'photo_5_src', '/collection_festive_lovable.jpg'),
       gridArea: 'festive',
+      alt: 'House of Varsh festive collection — luxury wedding and celebration wear'
     },
   ];
 
   return (
-    <section className="fc-section" id="gallery">
+    <section className="fc-section" id="gallery" aria-label="Featured Luxury Fashion Collections — Bridal, Sarees, Gowns, and Festive Wear">
       <div className="fc-container">
 
         {/* ── Header row ── */}
@@ -58,15 +63,15 @@ const PhotoGallery = () => {
           <div className="fc-header-left">
             <div className="fc-eyebrow">
               <span className="fc-eyebrow-line" />
-              <span className="fc-eyebrow-text">The Maison</span>
+              <span className="fc-eyebrow-text">Shop by Category — Luxury Fashion Collections</span>
               <span className="fc-eyebrow-line" />
             </div>
             <h2 className="fc-title">
-              Featured <span className="fc-title-italic">Collections</span>
+              Shop Our <span className="fc-title-italic">Luxury Collections</span>
             </h2>
           </div>
-          <a href="#collections" className="fc-view-all">
-            View All Collections →
+          <a href="#collections" className="fc-view-all" aria-label="Browse all House of Varsh luxury saree and couture collections">
+            Shop All Collections →
           </a>
         </motion.div>
 
@@ -87,7 +92,7 @@ const PhotoGallery = () => {
               ) : (
                 <img
                   src={col.image}
-                  alt={col.title}
+                  alt={col.alt}
                   loading={index === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                   className="fc-card__img"

@@ -39,14 +39,14 @@ const ShopByCollection = () => {
   };
 
   return (
-    <section className="shop-collection" id="collections">
+    <section className="shop-collection" id="collections" aria-label="New Arrivals — Shop Latest Handcrafted Luxury Sarees and Designer Lehengas Online">
       <div className="shimmer-overlay"></div>
       
       <div className="shop-collection-container">
         <div className="shop-collection-header">
           <div className="shop-collection-eyebrow">
             <span className="shop-collection-eyebrow-line"></span>
-            <span className="shop-collection-eyebrow-text">Just Arrived</span>
+            <span className="shop-collection-eyebrow-text">New Season — Latest Designer Collection</span>
             <span className="shop-collection-eyebrow-line"></span>
           </div>
           
@@ -57,17 +57,19 @@ const ShopByCollection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            New <span className="italic text-gradient-gold">Arrivals</span>
+            New <span className="italic text-gradient-gold">Arrivals</span> — Luxury Sarees & Designer Wear
           </motion.h2>
           
           <p className="shop-collection-subtitle">
-            {get('shop_by_collection', 'section_subtitle', 'Pieces born from the latest atelier sessions — quiet, intentional, and unmistakably Varsh.')}
+            {get('shop_by_collection', 'section_subtitle', 'Discover our newest luxury sarees, designer lehengas, and handcrafted couture — freshly arrived from the House of Varsh atelier. Each piece is handwoven with premium silks and artisan embroidery.')}
           </p>
         </div>
 
         <div className="new-arrivals-grid">
           {products.map((product, idx) => (
             <motion.article
+              itemScope
+              itemType="https://schema.org/Product"
               key={product.id}
               className="product-card group"
               initial={{ opacity: 0, y: 35 }}
@@ -139,11 +141,13 @@ const ShopByCollection = () => {
               </div>
 
               <div className="product-details">
-                <h3 className="product-title">
+                <h3 className="product-title" itemProp="name">
                   {product.name}
                 </h3>
-                <p className="product-price">
-                  {product.price}
+                <p className="product-price" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+                  <span itemProp="priceCurrency" content="INR" />
+                  <span itemProp="price">{product.price}</span>
+                  <meta itemProp="availability" content="https://schema.org/InStock" />
                 </p>
               </div>
             </motion.article>

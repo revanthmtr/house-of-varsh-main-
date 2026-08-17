@@ -1,0 +1,26 @@
+# ═══════════════════════════════════════════════════════════
+# House of Varsh — robots.txt
+# Premium Luxury Indian Couture | houseofvarsh.com
+# ═══════════════════════════════════════════════════════════
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /*.json$
+
+# Sitemap location
+Sitemap: https://houseofvarsh.com/sitemap.xml
+
+# Crawl-delay (optional, respectful to server)
+Crawl-delay: 2
+
+# Google-specific
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+
+# Bing-specific
+User-agent: Bingbot
+Allow: /
+Disallow: /api/

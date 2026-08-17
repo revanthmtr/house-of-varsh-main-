@@ -77,16 +77,16 @@ const Header = () => {
       </button>
 
       {/* Desktop Left nav */}
-      <div className="nav-links">
+      <nav className="nav-links" aria-label="Main navigation — Browse House of Varsh luxury collections">
         <a href={get('header', 'nav_link_1_href', '#new')}         className="nav-link">{get('header', 'nav_link_1_label', 'New Arrivals')}</a>
         <a href={get('header', 'nav_link_2_href', '#collections')} className="nav-link">{get('header', 'nav_link_2_label', 'Collections')}</a>
         <a href={get('header', 'nav_link_3_href', '#story')}       className="nav-link">{get('header', 'nav_link_3_label', 'Our Story')}</a>
-      </div>
+      </nav>
 
       {/* Centre logo */}
       <div className="logo">
         <a href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={get('header', 'logo_src', '/chinni_logo.png')} alt="House of Varsh" className="logo-img" />
+          <img src={get('header', 'logo_src', '/chinni_logo.png')} alt="House of Varsh — Premium Handcrafted Luxury Sarees & Indian Couture" className="logo-img" width="150" height="50" />
         </a>
       </div>
 

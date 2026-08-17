@@ -38,12 +38,12 @@ const LatestCollection = () => {
   const filteredProducts = products.filter(p => p.category === activeTab);
 
   return (
-    <section className="section latest-collection" id="new">
+    <section className="section latest-collection" id="new" aria-label="Shop Best Selling Luxury Sarees and Newly Launched Designer Collections Online">
       <div className="container">
         <div className="section-header text-center">
           <div className="lc-eyebrow">
             <span className="lc-eyebrow-line" />
-            <span className="lc-eyebrow-text">{get('latest_collection', 'eyebrow_label', 'New Season')}</span>
+            <span className="lc-eyebrow-text">{get('latest_collection', 'eyebrow_label', 'Best Sellers & New Launches')}</span>
             <span className="lc-eyebrow-line" />
           </div>
 
@@ -54,24 +54,24 @@ const LatestCollection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            The Latest{' '}
+            Shop the Latest{' '}
             <span className="lc-heading-italic">
-              {get('latest_collection', 'section_title_italic', 'Extravagance')}
+              {get('latest_collection', 'section_title_italic', 'Luxury Collections')}
             </span>
           </motion.h2>
 
-          <div className="tabs">
+          <div className="tabs" role="tablist" aria-label="Browse luxury saree collections by category">
             <div
               className={`tab ${activeTab === 'new' ? 'active' : ''}`}
               onClick={() => setActiveTab('new')}
             >
-              {get('latest_collection', 'tab_1_label', 'Newly Launched')}
+              {get('latest_collection', 'tab_1_label', 'Newly Launched Sarees')}
             </div>
             <div
               className={`tab ${activeTab === 'bestseller' ? 'active' : ''}`}
               onClick={() => setActiveTab('bestseller')}
             >
-              {get('latest_collection', 'tab_2_label', 'Best Seller')}
+              {get('latest_collection', 'tab_2_label', 'Best Selling Sarees')}
             </div>
           </div>
         </div>

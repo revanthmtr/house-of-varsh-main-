@@ -17,7 +17,7 @@ const PrivateAtelier = () => {
   };
 
   return (
-    <section className="pa-section" id="atelier">
+    <section className="pa-section" id="atelier" aria-label="Subscribe to House of Varsh — Exclusive Luxury Fashion Updates and Private Consultations">
       <div className="pa-container">
         <motion.div
           className="pa-card"
@@ -29,33 +29,34 @@ const PrivateAtelier = () => {
           <div className="pa-card-frame-outer">
             <div className="pa-card-frame-inner">
               <div className="pa-card-content">
-                <span className="pa-subtitle">Maison Invitation</span>
+                <span className="pa-subtitle">Exclusive Luxury Fashion Preview</span>
                 
                 {/* Heading */}
                 <h2 className="pa-title">
-                  {get('private_atelier', 'heading', 'Be among the first to see.')}
+                  {get('private_atelier', 'heading', 'Join the House of Varsh Inner Circle')}
                 </h2>
 
                 <p className="pa-desc">
-                  {get('private_atelier', 'description', 'Subscribe to receive private invitations to new drops, runway previews, and atelier appointments.')}
+                  {get('private_atelier', 'description', 'Subscribe for exclusive early access to new luxury saree collections, designer lehenga drops, private styling consultations, and invitation-only bridal couture previews. Be the first to shop limited-edition handcrafted pieces.')}
                 </p>
 
                 {/* Email form */}
                 {!subscribed ? (
-                  <form onSubmit={handleSubmit} className="pa-form">
+                  <form onSubmit={handleSubmit} className="pa-form" aria-label="Subscribe to House of Varsh luxury fashion newsletter">
                     <div className="pa-input-wrapper">
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Your email address"
+                        placeholder="Enter your email for exclusive access"
                         className="pa-input"
                         required
+                        aria-label="Email address for luxury fashion newsletter"
                       />
                       <span className="pa-input-line-active"></span>
                     </div>
-                    <button type="submit" className="pa-btn">
-                      {get('private_atelier', 'cta_label', 'Subscribe')}
+                    <button type="submit" className="pa-btn" aria-label="Subscribe to receive exclusive House of Varsh updates">
+                      {get('private_atelier', 'cta_label', 'Get Exclusive Access')}
                     </button>
                   </form>
                 ) : (
@@ -65,12 +66,12 @@ const PrivateAtelier = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6 }}
                   >
-                    You're on the list. Welcome to the inner circle.
+                    Welcome to the House of Varsh inner circle. You'll be first to see our newest luxury collections.
                   </motion.p>
                 )}
 
                 <p className="pa-legal">
-                  {get('private_atelier', 'legal_text', 'By subscribing you accept our privacy policy. Unsubscribe anytime.')}
+                  {get('private_atelier', 'legal_text', 'By subscribing you accept our privacy policy. Unsubscribe anytime. We never share your information.')}
                 </p>
               </div>
             </div>
@@ -82,3 +83,4 @@ const PrivateAtelier = () => {
 };
 
 export default PrivateAtelier;
+

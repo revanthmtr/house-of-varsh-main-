@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://houseofvarsh.com/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://houseofvarsh.com/brand_story_image.jpg</image:loc>
+      <image:caption>House of Varsh — Premium Luxury Indian Couture</image:caption>
+      <image:title>House of Varsh Brand</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://houseofvarsh.com/brand_identity_logo.png</image:loc>
+      <image:caption>House of Varsh Logo</image:caption>
+      <image:title>House of Varsh Logo</image:title>
+    </image:image>
+  </url>
+
+  <!-- Collections -->
+  <url>
+    <loc>https://houseofvarsh.com/#collections</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- New Arrivals -->
+  <url>
+    <loc>https://houseofvarsh.com/#new</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Our Story -->
+  <url>
+    <loc>https://houseofvarsh.com/#story</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Gallery -->
+  <url>
+    <loc>https://houseofvarsh.com/#gallery</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Atelier / Subscribe -->
+  <url>
+    <loc>https://houseofvarsh.com/#atelier</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+</urlset>

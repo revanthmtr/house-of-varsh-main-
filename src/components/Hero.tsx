@@ -12,18 +12,21 @@ const Hero = () => {
   const slides = [
     { 
       image: get('hero', 'slide_1_image', '/hero_fashion_1.png'), 
-      subtitle: get('hero', 'slide_1_subtitle', 'Timeless Couture'),   
-      title: get('hero', 'slide_1_title', 'The Divine Collection') 
+      subtitle: get('hero', 'slide_1_subtitle', 'Handcrafted Luxury Couture'),   
+      title: get('hero', 'slide_1_title', 'The Divine Collection'),
+      alt: 'House of Varsh premium handcrafted silk saree from The Divine Collection'
     },
     { 
       image: get('hero', 'slide_2_image', '/hero_slide_2.png'),                                                                                  
-      subtitle: get('hero', 'slide_2_subtitle', 'Regal Opulence'),     
-      title: get('hero', 'slide_2_title', 'Golden Embroidery')     
+      subtitle: get('hero', 'slide_2_subtitle', 'Artisan Gold Embroidery'),     
+      title: get('hero', 'slide_2_title', 'Golden Embroidery'),
+      alt: 'House of Varsh designer lehenga with intricate golden zari embroidery'
     },
     { 
       image: get('hero', 'slide_3_image', '/hero_slide_3.png'),                                                                                 
-      subtitle: get('hero', 'slide_3_subtitle', 'Heritage Anarkali'), 
-      title: get('hero', 'slide_3_title', 'Emerald Shadows')       
+      subtitle: get('hero', 'slide_3_subtitle', 'Heritage Anarkali Collection'), 
+      title: get('hero', 'slide_3_title', 'Emerald Shadows'),
+      alt: 'House of Varsh heritage anarkali suit in emerald green silk'
     },
   ];
 
@@ -35,12 +38,14 @@ const Hero = () => {
   }, [slides.length]);
 
   return (
-    <section className="hero">
+    <section className="hero" aria-label="House of Varsh — Premium Handcrafted Sarees and Luxury Indian Couture" itemScope itemType="https://schema.org/WPHeader">
       <div className="hero-background-container">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
             className="hero-background"
+            role="img"
+            aria-label={slides[currentSlide].alt}
             style={{ y, backgroundImage: `url('${slides[currentSlide].image}')` }}
             initial={{ opacity: 0, scale: 1.08 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -54,12 +59,12 @@ const Hero = () => {
         <div className="hero-glow-2" />
       </div>
 
-      <div className="hero-content">
+      <header className="hero-content">
         <div className="hero-text-block">
           <div className="hero-eyebrow-container">
             <span className="hero-eyebrow-line" />
             <AnimatePresence mode="wait">
-              <motion.div 
+              <motion.span 
                 key={`${currentSlide}-subtitle`} 
                 className="hero-subtitle"
                 initial={{ opacity: 0, y: 15 }} 
@@ -68,7 +73,7 @@ const Hero = () => {
                 transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 1, 0.5, 1] }}
               >
                 {slides[currentSlide].subtitle}
-              </motion.div>
+              </motion.span>
             </AnimatePresence>
           </div>
 
@@ -91,7 +96,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
           >
-            {get('hero', 'description', 'Discover handcrafted silhouettes showcasing the finest Indian heritage, tailored with precision for the modern royalty.')}
+            {get('hero', 'description', 'Discover premium handcrafted silk sarees, designer lehengas, and luxury Indian couture — handwoven by master artisans with over 15 years of heritage craftsmanship. Shop the finest bridal wear and contemporary ethnic fashion online.')}
           </motion.p>
 
           <motion.div 
@@ -102,37 +107,43 @@ const Hero = () => {
           >
             <button 
               className="hero-btn-primary"
+              aria-label="Explore our luxury saree and lehenga collections"
               onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}
             >
               {get('hero', 'cta_button_label', 'Explore Collection')}
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
             </button>
             <button 
               className="hero-btn-outline"
-              onClick={() => document.getElementById('new')?.scrollIntoView({ behavior: 'smooth' })}
+              aria-label="Read our brand story and heritage craftsmanship journey"
+              onClick={() => document.getElementById('story')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Atelier Story
+              Our Heritage Story
             </button>
           </motion.div>
         </div>
-      </div>
+      </header>
 
       {/* Scroll down indicator */}
-      <div 
+      <nav 
         className="hero-scroll-indicator" 
+        aria-label="Scroll to collections"
         onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}
       >
         <span>Scroll Down</span>
         <div className="hero-scroll-line" />
-      </div>
+      </nav>
 
-      <div className="hero-indicators">
+      <div className="hero-indicators" role="tablist" aria-label="Slide navigation">
         {slides.map((_, idx) => (
           <div 
             key={idx} 
+            role="tab"
+            aria-selected={idx === currentSlide}
+            aria-label={`View slide ${idx + 1}`}
             className={`hero-indicator ${idx === currentSlide ? 'active' : ''}`} 
             onClick={() => setCurrentSlide(idx)}
           >
