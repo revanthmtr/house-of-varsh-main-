@@ -82,14 +82,15 @@ const LatestCollection = () => {
 
         <div className="collection-layout">
           <div className="product-grid">
-            {filteredProducts.map((product, idx) => (
+            {filteredProducts.map((product) => (
               <motion.div
                 className="product-card"
                 key={product.id}
-                initial={{ opacity: 0, y: 35 }}
+                initial={{ opacity: 0.9, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.05, ease: [0.25, 1, 0.5, 1] }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
               >
+
                 <div className="product-image-container">
                   {product.badge && <div className="product-badge">{product.badge}</div>}
                   

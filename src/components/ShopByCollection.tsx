@@ -70,17 +70,18 @@ const ShopByCollection = () => {
         </div>
 
         <div className="new-arrivals-grid">
-          {products.map((product, idx) => (
+          {products.map((product) => (
             <motion.article
               itemScope
               itemType="https://schema.org/Product"
               key={product.id}
               className="product-card group"
-              initial={{ opacity: 0, y: 35 }}
+              initial={{ opacity: 0.9, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.25, 1, 0.5, 1] }}
+              viewport={{ once: true, margin: '200px' }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             >
+
               <div className="product-image-wrapper">
                 {product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov') ? (
                   <video

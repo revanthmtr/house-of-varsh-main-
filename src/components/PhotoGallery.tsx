@@ -82,11 +82,12 @@ const PhotoGallery = () => {
               key={col.id}
               href="#collections"
               className={`fc-card fc-card--${col.id}`}
-              initial={{ opacity: 0, y: 36 }}
+              initial={{ opacity: 0.9, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.9, delay: index * 0.08, ease: [0.25, 1, 0.5, 1] }}
+              viewport={{ once: true, margin: '200px' }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             >
+
               {col.image.endsWith('.mp4') || col.image.endsWith('.webm') || col.image.endsWith('.mov') ? (
                 <video src={col.image} autoPlay loop muted playsInline preload="metadata" className="fc-card__img" style={{ objectFit: 'cover' }} />
               ) : (
