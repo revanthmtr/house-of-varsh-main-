@@ -17,7 +17,13 @@ import { CartProvider } from './context/CartContext';
 import { SiteContentProvider } from './context/SiteContentContext';
 
 const CustomCursor = () => {
+  // Disable on mobile/touch devices for peak mobile performance
+  if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) {
+    return null;
+  }
+
   const cursorX = useMotionValue(-100);
+
   const cursorY = useMotionValue(-100);
   const ringX = useMotionValue(-100);
   const ringY = useMotionValue(-100);
