@@ -64,15 +64,21 @@ const GoogleOneTap = () => {
     try {
       const res = await fetch('/api/auth/google', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ credential: credentialResponse.credential })
       });
-      const data = await res.json();
-      if (res.ok) login(data.token, data.user);
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json().catch(() => null);
+        if (res.ok && data?.token && data?.user) {
+          login(data.token, data.user);
+        }
+      }
     } catch (err) {
       console.error('One Tap error:', err);
     }
   }, [login]);
+
 
   useGoogleOneTapLogin({
     onSuccess: handleOneTapSuccess,

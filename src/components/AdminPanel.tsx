@@ -385,16 +385,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     if (!token) return;
     try {
       const [prodRes, userRes, orderRes, auditRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/admin/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/products').catch(() => null),
+        fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+        fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+        fetch('/api/admin/audit-logs', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
       ]);
-      const p = await prodRes.json();
-      const u = await userRes.json();
-      const o = await orderRes.json();
-      const a = await auditRes.json();
-      setProducts(p);
+      
+      const p = prodRes && prodRes.ok ? await prodRes.json().catch(() => []) : [];
+      const u = userRes && userRes.ok ? await userRes.json().catch(() => []) : [];
+      const o = orderRes && orderRes.ok ? await orderRes.json().catch(() => []) : [];
+      const a = auditRes && auditRes.ok ? await auditRes.json().catch(() => []) : [];
+      
+      if (Array.isArray(p)) setProducts(p);
       if (Array.isArray(u)) setUsers(u);
       if (Array.isArray(o)) setOrders(o);
       if (Array.isArray(a)) setAuditLogs(a);
@@ -402,6 +404,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       console.error('Error fetching admin data', err);
     }
   };
+
 
   useEffect(() => {
     if (isOpen) fetchData();

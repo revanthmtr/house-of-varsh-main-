@@ -44,21 +44,30 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError(''); setLoading(true);
     try {
       const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-      const body: any = { email, password };
-      if (mode === 'register') body.name = name;
+      const body: any = { email: email.trim().toLowerCase(), password };
+      if (mode === 'register') body.name = name.trim();
 
-      const res  = await fetch(endpoint, {
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+
+      let data: any = {};
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json().catch(() => ({}));
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || data.message || `Authentication service error (${res.status})`);
+      }
+
       handleSuccess(data.token, data.user,
-        mode === 'register' ? `Welcome, ${data.user.name || data.user.email}!` : `Welcome back, ${data.user.name || data.user.email}!`
+        mode === 'register' ? `Welcome, ${data.user?.name || data.user?.email || 'Valued Client'}!` : `Welcome back, ${data.user?.name || data.user?.email || 'Valued Client'}!`
       );
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Unable to connect to authentication server. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -69,20 +78,31 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError(''); setGLoading(true);
     try {
       if (!credentialResponse.credential) throw new Error('Google sign-in did not return a credential.');
-      const res  = await fetch('/api/auth/google', {
+      
+      const res = await fetch('/api/auth/google', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ credential: credentialResponse.credential }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Google authentication failed.');
-      handleSuccess(data.token, data.user, `Welcome, ${data.user.name || data.user.email}!`);
+
+      let data: any = {};
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json().catch(() => ({}));
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || data.message || 'Google authentication verification failed.');
+      }
+
+      handleSuccess(data.token, data.user, `Welcome, ${data.user?.name || data.user?.email || 'Valued Client'}!`);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Google sign-in connection failed. Please try again.');
     } finally {
       setGLoading(false);
     }
   }, []);
+
 
   const isLoading = loading || gLoading;
 
