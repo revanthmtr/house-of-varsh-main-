@@ -546,6 +546,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   };
 
   // Helper values
+  const pendingOrdersCount = orders.filter(o => o.status === 'pending').length;
+  const ongoingOrdersCount = orders.filter(o => o.status === 'pending' || o.status === 'confirmed' || o.status === 'shipped').length;
+  const deliveredOrdersCount = orders.filter(o => o.status === 'delivered').length;
+  const cancelledOrdersCount = orders.filter(o => o.status === 'cancelled').length;
+
+  const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'ongoing' | 'delivered' | 'cancelled'>('all');
+
+  const filteredOrders = orders.filter(o => {
+    if (orderFilter === 'pending') return o.status === 'pending';
+    if (orderFilter === 'ongoing') return o.status === 'pending' || o.status === 'confirmed' || o.status === 'shipped';
+    if (orderFilter === 'delivered') return o.status === 'delivered';
+    if (orderFilter === 'cancelled') return o.status === 'cancelled';
+    return true;
+  });
+
   const totalRevenue = orders
     .filter(o => o.status !== 'cancelled')
     .reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
@@ -575,7 +590,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                 <div className="ap-nav-divider">Managment</div>
                 <button className={`ap-nav-item ${activeMenu === 'orders' ? 'active' : ''}`} onClick={() => setActiveMenu('orders')}>
                   <ShoppingBag size={18} /> Live Orders
-                  {orders.length > 0 && <span className="ap-nav-badge">{orders.length}</span>}
+                  {pendingOrdersCount > 0 && (
+                    <span className="ap-nav-badge" style={{ background: '#ef4444', color: '#FFF' }}>
+                      {pendingOrdersCount}
+                    </span>
+                  )}
                 </button>
                 <button className={`ap-nav-item ${activeMenu === 'customers' ? 'active' : ''}`} onClick={() => setActiveMenu('customers')}>
                   <UsersIcon size={18} /> Customers
@@ -619,7 +638,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                   <div className="ap-header-divider" />
                   <h2>
                     {activeMenu === 'dashboard' && 'Executive Dashboard'}
-                    {activeMenu === 'orders' && 'Real-time Order Tracking'}
+                    {activeMenu === 'orders' && 'Real-time Order Tracking & Fulfillment'}
                     {activeMenu === 'customers' && 'Customer Intelligence'}
                     {activeMenu === 'products' && 'Product Matrix'}
                     {activeMenu === 'content' && 'Global Content Layout'}
@@ -638,27 +657,36 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                   <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="ap-dashboard">
                     <div className="ap-stats-grid">
                       <div className="ap-stat-card ap-interactive-hover">
-                        <span className="ap-stat-label">Total Revenue</span>
+                        <span className="ap-stat-label">Net Realized Revenue</span>
                         <div className="ap-stat-value">&#8377;{totalRevenue.toLocaleString('en-IN')}</div>
                       </div>
                       <div className="ap-stat-card ap-interactive-hover">
-                        <span className="ap-stat-label">Total Orders</span>
-                        <div className="ap-stat-value">{orders.length}</div>
+                        <span className="ap-stat-label">Active / Ongoing Orders</span>
+                        <div className="ap-stat-value" style={{ color: ongoingOrdersCount > 0 ? 'var(--ap-gold)' : undefined }}>
+                          {ongoingOrdersCount}
+                        </div>
                       </div>
                       <div className="ap-stat-card ap-interactive-hover">
-                        <span className="ap-stat-label">Total Authenticated Clients</span>
-                        <div className="ap-stat-value">{users.length}</div>
+                        <span className="ap-stat-label">New Action Required</span>
+                        <div className="ap-stat-value" style={{ color: pendingOrdersCount > 0 ? '#ef4444' : '#10b981' }}>
+                          {pendingOrdersCount}
+                        </div>
                       </div>
                       <div className="ap-stat-card ap-interactive-hover">
-                        <span className="ap-stat-label">Products Active</span>
-                        <div className="ap-stat-value">{products.length}</div>
+                        <span className="ap-stat-label">Completed Deliveries</span>
+                        <div className="ap-stat-value" style={{ color: '#10b981' }}>
+                          {deliveredOrdersCount}
+                        </div>
                       </div>
                     </div>
                     
                     <div className="ap-dashboard-recent">
                       <div className="ap-card ap-interactive-hover" style={{ flex: 1 }}>
                         <div className="ap-card-header">
-                          <h3>Recent Orders</h3>
+                          <h3>Recent Active Orders</h3>
+                          <button className="ap-btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.72rem' }} onClick={() => setActiveMenu('orders')}>
+                            View All Live Orders →
+                          </button>
                         </div>
                         <div className="ap-table-wrapper">
                           <table className="ap-table">
@@ -673,7 +701,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                             <tbody>
                               {orders.slice(0, 5).map(o => (
                                 <tr key={o.id}>
-                                  <td><strong>{o.user_name || 'Guest'}</strong><br/><span style={{opacity: 0.5}}>{o.user_email}</span></td>
+                                  <td><strong>{o.user_name || o.shipping_name || 'Guest'}</strong><br/><span style={{opacity: 0.5}}>{o.user_email}</span></td>
                                   <td>{(o.items || []).map(i => i.name).join(', ')}</td>
                                   <td>&#8377;{Number(o.total_amount).toLocaleString('en-IN')}</td>
                                   <td><span className={`ap-badge status-${o.status}`} style={{ borderRadius: '30px' }}>{o.status}</span></td>
@@ -692,26 +720,73 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                 {activeMenu === 'orders' && (
                   <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
                     <div className="ap-card ap-interactive-hover">
-                      <div className="ap-card-header">
-                        <h3>Live Orders</h3>
-                        <button className="ap-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }} onClick={fetchData}>&#8635; Refresh</button>
+                      <div className="ap-card-header" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+                        <div>
+                          <h3>Live Orders</h3>
+                          <span style={{ fontSize: '0.78rem', opacity: 0.7 }}>
+                            {pendingOrdersCount} new order(s) waiting for review • {ongoingOrdersCount} active in fulfillment
+                          </span>
+                        </div>
+                        <button className="ap-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }} onClick={fetchData}>
+                          &#8635; Refresh Orders
+                        </button>
                       </div>
+
+                      {/* Order Filter Tabs */}
+                      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', padding: '1rem 1.4rem', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,1,3,0.4)' }}>
+                        <button
+                          className={`ap-btn-outline ${orderFilter === 'all' ? 'active' : ''}`}
+                          style={{ padding: '0.4rem 0.9rem', fontSize: '0.74rem', borderRadius: '20px', background: orderFilter === 'all' ? 'var(--ap-gold)' : undefined, color: orderFilter === 'all' ? '#0A0103' : undefined, fontWeight: orderFilter === 'all' ? 700 : 500 }}
+                          onClick={() => setOrderFilter('all')}
+                        >
+                          📋 All Orders ({orders.length})
+                        </button>
+                        <button
+                          className={`ap-btn-outline ${orderFilter === 'pending' ? 'active' : ''}`}
+                          style={{ padding: '0.4rem 0.9rem', fontSize: '0.74rem', borderRadius: '20px', background: orderFilter === 'pending' ? '#ef4444' : undefined, color: orderFilter === 'pending' ? '#FFF' : undefined, fontWeight: orderFilter === 'pending' ? 700 : 500 }}
+                          onClick={() => setOrderFilter('pending')}
+                        >
+                          🔴 Action Required ({pendingOrdersCount})
+                        </button>
+                        <button
+                          className={`ap-btn-outline ${orderFilter === 'ongoing' ? 'active' : ''}`}
+                          style={{ padding: '0.4rem 0.9rem', fontSize: '0.74rem', borderRadius: '20px', background: orderFilter === 'ongoing' ? 'var(--ap-gold)' : undefined, color: orderFilter === 'ongoing' ? '#0A0103' : undefined, fontWeight: orderFilter === 'ongoing' ? 700 : 500 }}
+                          onClick={() => setOrderFilter('ongoing')}
+                        >
+                          ⚡ Active Ongoing ({ongoingOrdersCount})
+                        </button>
+                        <button
+                          className={`ap-btn-outline ${orderFilter === 'delivered' ? 'active' : ''}`}
+                          style={{ padding: '0.4rem 0.9rem', fontSize: '0.74rem', borderRadius: '20px', background: orderFilter === 'delivered' ? '#10b981' : undefined, color: orderFilter === 'delivered' ? '#0A0103' : undefined, fontWeight: orderFilter === 'delivered' ? 700 : 500 }}
+                          onClick={() => setOrderFilter('delivered')}
+                        >
+                          ✅ Delivered ({deliveredOrdersCount})
+                        </button>
+                        <button
+                          className={`ap-btn-outline ${orderFilter === 'cancelled' ? 'active' : ''}`}
+                          style={{ padding: '0.4rem 0.9rem', fontSize: '0.74rem', borderRadius: '20px', background: orderFilter === 'cancelled' ? '#6b7280' : undefined, color: orderFilter === 'cancelled' ? '#FFF' : undefined, fontWeight: orderFilter === 'cancelled' ? 700 : 500 }}
+                          onClick={() => setOrderFilter('cancelled')}
+                        >
+                          ❌ Cancelled ({cancelledOrdersCount})
+                        </button>
+                      </div>
+
                       <div className="ap-table-wrapper">
                         <table className="ap-table">
                           <thead>
                             <tr>
-                              <th>Order</th>
+                              <th>Order #</th>
                               <th>Customer</th>
                               <th>Items</th>
-                              <th>Shipping To</th>
+                              <th>Shipping Address</th>
                               <th>Total</th>
                               <th>Payment</th>
-                              <th>Status</th>
+                              <th>Status Action</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {orders.map(o => (
-                              <tr key={o.id}>
+                            {filteredOrders.map(o => (
+                              <tr key={o.id} style={{ background: o.status === 'pending' ? 'rgba(239, 68, 68, 0.06)' : undefined }}>
                                 <td style={{fontFamily: 'monospace', color: 'var(--ap-gold-light)'}}>
                                   <strong>#{o.id.toString().padStart(4, '0')}</strong>
                                   <br/><span style={{opacity: 0.6, fontSize: '0.72rem'}}>{new Date(o.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
@@ -724,10 +799,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                                   {(o.items || []).map((item, idx) => (
                                     <div key={item.id || idx} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
                                       {item.img && (item.img.endsWith('.mp4') || item.img.endsWith('.webm')) ? (
-                                        <video src={item.img} autoPlay loop muted playsInline style={{width: '34px', height: '34px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0, border: '1px solid var(--ap-gold-border)'}} />
+                                        <video src={resolveMediaUrl(item.img)} autoPlay loop muted playsInline style={{width: '34px', height: '34px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0, border: '1px solid var(--ap-gold-border)'}} />
                                       ) : (
                                         <img
-                                          src={item.img || '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'}
+                                          src={resolveMediaUrl(item.img) || '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'}
                                           alt={item.name}
                                           style={{width: '34px', height: '34px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0, border: '1px solid var(--ap-gold-border)'}}
                                           onError={(e) => { (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'; }}
@@ -759,24 +834,64 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                                   </span>
                                 </td>
                                 <td>
-                                  <select
-                                    value={o.status}
-                                    disabled={updatingOrderId === o.id}
-                                    onChange={(e) => handleOrderStatusChange(o.id, e.target.value)}
-                                    className={`ap-badge ap-status-select status-${o.status}`}
-                                  >
-                                    <option value="pending">Pending</option>
-                                    <option value="confirmed">Confirmed</option>
-                                    <option value="shipped">Shipped</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
-                                  </select>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '130px' }}>
+                                    <select
+                                      value={o.status}
+                                      disabled={updatingOrderId === o.id}
+                                      onChange={(e) => handleOrderStatusChange(o.id, e.target.value)}
+                                      className={`ap-badge ap-status-select status-${o.status}`}
+                                      style={{ width: '100%', cursor: 'pointer' }}
+                                    >
+                                      <option value="pending">⏳ Pending Review</option>
+                                      <option value="confirmed">✓ Confirmed</option>
+                                      <option value="shipped">🚚 Shipped</option>
+                                      <option value="delivered">🎉 Delivered</option>
+                                      <option value="cancelled">✕ Cancelled</option>
+                                    </select>
+                                    
+                                    {/* 1-Click Quick Progression Buttons */}
+                                    {o.status === 'pending' && (
+                                      <button
+                                        className="ap-btn-primary"
+                                        style={{ padding: '0.3rem 0.6rem', fontSize: '0.72rem', width: '100%' }}
+                                        disabled={updatingOrderId === o.id}
+                                        onClick={() => handleOrderStatusChange(o.id, 'confirmed')}
+                                      >
+                                        ✓ Accept Order
+                                      </button>
+                                    )}
+                                    {o.status === 'confirmed' && (
+                                      <button
+                                        className="ap-btn-primary"
+                                        style={{ padding: '0.3rem 0.6rem', fontSize: '0.72rem', width: '100%', background: '#3b82f6' }}
+                                        disabled={updatingOrderId === o.id}
+                                        onClick={() => handleOrderStatusChange(o.id, 'shipped')}
+                                      >
+                                        🚚 Mark Shipped
+                                      </button>
+                                    )}
+                                    {o.status === 'shipped' && (
+                                      <button
+                                        className="ap-btn-primary"
+                                        style={{ padding: '0.3rem 0.6rem', fontSize: '0.72rem', width: '100%', background: '#10b981' }}
+                                        disabled={updatingOrderId === o.id}
+                                        onClick={() => handleOrderStatusChange(o.id, 'delivered')}
+                                      >
+                                        🎉 Mark Delivered
+                                      </button>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             ))}
-                            {orders.length === 0 && <tr><td colSpan={7} style={{ textAlign: 'center', opacity: 0.5, padding: '3rem' }}>No orders placed yet.</td></tr>}
+                            {filteredOrders.length === 0 && (
+                              <tr>
+                                <td colSpan={7} style={{ textAlign: 'center', opacity: 0.6, padding: '3.5rem' }}>
+                                  No orders matching the selected filter ({orderFilter}).
+                                </td>
+                              </tr>
+                            )}
                           </tbody>
-
                         </table>
                       </div>
                     </div>
