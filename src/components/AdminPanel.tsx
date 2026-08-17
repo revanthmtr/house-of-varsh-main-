@@ -380,6 +380,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   // Product Form State
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ name: '', price: '', category: 'new', img: '', badge: '' });
+  const [isUploadingProductImg, setIsUploadingProductImg] = useState(false);
+
+  const handleProductImgUpload = async (file: File) => {
+    if (!token) return;
+    setIsUploadingProductImg(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      setFormData(prev => ({ ...prev, img: data.url }));
+    } catch (err) {
+      console.error(err);
+      alert('Image upload failed. Please try a different file.');
+    } finally {
+      setIsUploadingProductImg(false);
+    }
+  };
 
   const fetchData = async () => {
     if (!token) return;
@@ -404,7 +427,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       console.error('Error fetching admin data', err);
     }
   };
-
 
   useEffect(() => {
     if (isOpen) fetchData();
@@ -436,6 +458,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     setFormData({ name: product.name, price: product.price, category: product.category, img: product.img, badge: product.badge || '' });
     setActiveMenu('products');
   };
+
 
   const handleDeleteProduct = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this product forever?')) return;
@@ -785,30 +808,49 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                         <form onSubmit={handleProductSubmit} className="ap-form">
                           <div className="ap-field">
                             <label>Product Name</label>
-                            <input type="text" className="ap-input" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
+                            <input type="text" className="ap-input" placeholder="e.g. Royal Silk Banarasi Saree" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
                           </div>
                           <div className="ap-grid-2">
                             <div className="ap-field">
-                              <label>Price Vector</label>
-                              <input type="text" className="ap-input" placeholder="$X,XXX" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required />
+                              <label>Price (INR)</label>
+                              <input type="text" className="ap-input" placeholder="₹ 1,25,000" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required />
                             </div>
                             <div className="ap-field">
-                              <label>Category Label</label>
-                              <input type="text" className="ap-input" placeholder="new / bestseller" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} required />
+                              <label>Category</label>
+                              <select className="ap-input" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
+                                <option value="new">Newly Launched</option>
+                                <option value="bestseller">Best Seller</option>
+                              </select>
                             </div>
                           </div>
                           <div className="ap-field">
-                            <label>Image Source</label>
-                            <input type="text" className="ap-input" value={formData.img} onChange={e => setFormData({ ...formData, img: e.target.value })} required />
+                            <label>Image Source / Upload</label>
+                            <div style={{ display: 'flex', gap: '0.6rem' }}>
+                              <input type="text" className="ap-input" placeholder="/house_of_varsh-... or https://..." value={formData.img} onChange={e => setFormData({ ...formData, img: e.target.value })} required />
+                              <label className="ap-btn-outline" style={{ margin: 0, padding: '0.65rem 1rem', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                {isUploadingProductImg ? 'Uploading…' : '📁 Browse'}
+                                <input type="file" accept="image/*,video/*" style={{ display: 'none' }} disabled={isUploadingProductImg} onChange={e => { if (e.target.files?.[0]) handleProductImgUpload(e.target.files[0]); }} />
+                              </label>
+                            </div>
+                            {formData.img && (
+                              <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                {formData.img.endsWith('.mp4') || formData.img.endsWith('.webm') ? (
+                                  <video src={formData.img} autoPlay loop muted playsInline style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--ap-gold)' }} />
+                                ) : (
+                                  <img src={formData.img} alt="Preview" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--ap-gold)' }} onError={(e) => { (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'; }} />
+                                )}
+                                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>Media ready</span>
+                              </div>
+                            )}
                           </div>
                           <div className="ap-field">
-                            <label>Highlight Badge</label>
-                            <input type="text" className="ap-input" placeholder="e.g. LIMITED EDITION" value={formData.badge} onChange={e => setFormData({ ...formData, badge: e.target.value })} />
+                            <label>Highlight Badge (Optional)</label>
+                            <input type="text" className="ap-input" placeholder="e.g. LIMITED EDITION, COUTURE" value={formData.badge} onChange={e => setFormData({ ...formData, badge: e.target.value })} />
                           </div>
-                          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
-                            <button type="submit" className="ap-btn-primary" style={{ flex: 1 }}>{editingId ? 'Update Asset' : 'Initialize Product'}</button>
+                          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+                            <button type="submit" className="ap-btn-primary" style={{ flex: 1 }}>{editingId ? 'Update Product' : 'Publish Product'}</button>
                             {editingId && (
-                              <button type="button" className="ap-btn-outline" onClick={() => { setEditingId(null); setFormData({ name: '', price: '', category: 'new', img: '', badge: '' }); }}>Abort</button>
+                              <button type="button" className="ap-btn-outline" onClick={() => { setEditingId(null); setFormData({ name: '', price: '', category: 'new', img: '', badge: '' }); }}>Cancel</button>
                             )}
                           </div>
                         </form>
@@ -818,21 +860,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                     {/* Products List */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       {products.map(product => (
-                        <div className="ap-product-card ap-interactive-hover" key={product.id}>
-                          <img src={product.img} alt={product.name} />
+                        <div className="ap-product-card" key={product.id}>
+                          {product.img && (product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov')) ? (
+                            <video src={product.img} autoPlay loop muted playsInline style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px' }} />
+                          ) : (
+                            <img
+                              src={product.img}
+                              alt={product.name}
+                              loading="lazy"
+                              decoding="async"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg';
+                              }}
+                            />
+                          )}
                           <div className="ap-info">
                             <h4>{product.name}</h4>
-                            <span>{product.price} // {product.category.toUpperCase()}</span>
+                            <span>{product.price} // {product.category?.toUpperCase() || 'NEW'}</span>
                           </div>
                           <div className="ap-actions">
-                            <button className="ap-btn-outline ap-btn-hover" onClick={() => handleEditProduct(product)}>EDIT</button>
-                            <button className="ap-btn-danger ap-btn-hover" onClick={() => handleDeleteProduct(product.id)}>KILL</button>
+                            <button className="ap-btn-outline" onClick={() => handleEditProduct(product)}>EDIT</button>
+                            <button className="ap-btn-danger" onClick={() => handleDeleteProduct(product.id)}>DELETE</button>
                           </div>
                         </div>
                       ))}
+                      {products.length === 0 && (
+                        <div className="ap-card" style={{ padding: '3rem', textAlign: 'center', opacity: 0.6 }}>
+                          No products found. Add your first piece using the form on the left.
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
+
 
                 {/* ── CONTENT ── */}
                 {activeMenu === 'content' && (
