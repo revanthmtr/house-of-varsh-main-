@@ -39,7 +39,20 @@ const LatestCollection = () => {
     );
   };
 
-  const filteredProducts = products.filter(p => p.category === activeTab);
+  const COLLECTION_TABS = [
+    { id: 'all',          label: get('latest_collection', 'tab_all_label', 'All Pieces') },
+    { id: 'new',          label: get('latest_collection', 'tab_1_label', 'Newly Launched') },
+    { id: 'bestseller',   label: get('latest_collection', 'tab_2_label', 'Best Sellers') },
+    { id: 'bridal',       label: get('latest_collection', 'tab_bridal_label', 'Bridal Couture') },
+    { id: 'silk',         label: get('latest_collection', 'tab_silk_label', 'Silk Sarees') },
+    { id: 'gown',         label: get('latest_collection', 'tab_gown_label', 'Designer Gowns') },
+    { id: 'contemporary', label: get('latest_collection', 'tab_contemporary_label', 'Contemporary') },
+    { id: 'festive',      label: get('latest_collection', 'tab_festive_label', 'Festive Wear') },
+  ];
+
+  const filteredProducts = activeTab === 'all'
+    ? products
+    : products.filter(p => p.category === activeTab);
 
   return (
     <section className="section latest-collection" id="new" aria-label="Shop Best Selling Luxury Sarees and Newly Launched Designer Collections Online">
@@ -65,20 +78,18 @@ const LatestCollection = () => {
           </motion.h2>
 
           <div className="tabs" role="tablist" aria-label="Browse luxury saree collections by category">
-            <div
-              className={`tab ${activeTab === 'new' ? 'active' : ''}`}
-              onClick={() => setActiveTab('new')}
-            >
-              {get('latest_collection', 'tab_1_label', 'Newly Launched Sarees')}
-            </div>
-            <div
-              className={`tab ${activeTab === 'bestseller' ? 'active' : ''}`}
-              onClick={() => setActiveTab('bestseller')}
-            >
-              {get('latest_collection', 'tab_2_label', 'Best Selling Sarees')}
-            </div>
+            {COLLECTION_TABS.map((tab) => (
+              <div
+                key={tab.id}
+                className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </div>
+            ))}
           </div>
         </div>
+
 
         <div className="collection-layout">
           <div className="product-grid">

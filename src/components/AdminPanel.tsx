@@ -897,13 +897,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                               <input type="text" className="ap-input" placeholder="₹ 1,25,000" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required />
                             </div>
                             <div className="ap-field">
-                              <label>Category</label>
+                              <label>Collection / Category</label>
                               <select className="ap-input" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
-                                <option value="new">Newly Launched</option>
-                                <option value="bestseller">Best Seller</option>
+                                <option value="new">✨ Newly Launched</option>
+                                <option value="bestseller">🏆 Best Seller</option>
+                                <option value="bridal">👰 Bridal Couture Collection</option>
+                                <option value="silk">🥻 Premium Silk Sarees</option>
+                                <option value="gown">👗 Designer Evening Gowns</option>
+                                <option value="contemporary">✨ Contemporary Ethnic Wear</option>
+                                <option value="festive">🎉 Festive & Wedding Collection</option>
                               </select>
                             </div>
                           </div>
+
                           <div className="ap-field">
                             <label>Image Source / Upload</label>
                             <div style={{ display: 'flex', gap: '0.6rem' }}>

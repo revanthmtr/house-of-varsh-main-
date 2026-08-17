@@ -54,30 +54,41 @@
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 2.5rem;
-  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.6rem;
+  margin-top: 2rem;
 }
 
 .tab {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
-  color: rgba(26, 10, 16, 0.45);
+  letter-spacing: 0.16em;
+  color: rgba(26, 10, 16, 0.55);
   font-weight: 600;
   cursor: pointer;
-  padding: 0.6rem 1rem;
-  transition: color 0.4s ease;
+  padding: 0.5rem 1.1rem;
+  border-radius: 30px;
+  background: rgba(212, 175, 55, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  transition: all 0.3s ease;
   position: relative;
+  white-space: nowrap;
 }
 
 .tab:hover {
   color: var(--burgundy);
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.14);
 }
 
 .tab.active {
-  color: var(--burgundy);
+  color: #0A0103;
+  background: linear-gradient(135deg, #D4AF37 0%, #B38E1E 100%);
+  border-color: #D4AF37;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
 }
+
 
 .tab::after {
   content: '';
