@@ -56,6 +56,11 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+const getMe = async (req, res) => {
+  res.json({ user: req.user });
+};
+
+
 module.exports = {
   register,
   login,
@@ -64,4 +69,5 @@ module.exports = {
   resetPassword,
   getMe,
 };
+
 
