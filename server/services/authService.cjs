@@ -4,9 +4,15 @@ const { OAuth2Client } = require('google-auth-library');
 const { queryGet, queryRun } = require('../config/db.cjs');
 const { SECRET } = require('../middleware/authMiddleware.cjs');
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const GOOGLE_CLIENT_IDS = [
+  process.env.GOOGLE_CLIENT_ID,
+  '118817308805-sehbo62sknilfkeht45m04252rfrevq9.apps.googleusercontent.com',
+  '303025946632-vih404g8jdfgs09rsvfbjnt80d5argia.apps.googleusercontent.com',
+].filter(Boolean);
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+const googleClient = new OAuth2Client();
+
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'revanthmtr@gmail.com')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
@@ -29,22 +35,23 @@ const registerUser = async ({ name, email, password, ip, userAgent }) => {
     throw { status: 400, message: 'All fields (name, email, password) are required.' };
   }
 
-  const existing = await queryGet('SELECT id FROM users WHERE email = ?', [email]);
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = await queryGet('SELECT id FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
   if (existing) {
-    await logAudit({ email, action: 'Register Failed', ip, userAgent, status: 'failed', details: 'Email already exists' });
+    await logAudit({ email: normalizedEmail, action: 'Register Failed', ip, userAgent, status: 'failed', details: 'Email already exists' });
     throw { status: 400, message: 'Email already registered.' };
   }
 
   const now = new Date().toISOString();
   const hash = bcrypt.hashSync(password, 10);
-  const role = resolveRole(email);
+  const role = resolveRole(normalizedEmail);
   const result = await queryRun(
     `INSERT INTO users (name, email, password, role, last_login, login_count, last_ip, last_device, auth_method) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)`,
-    [name, email, hash, role, now, ip, userAgent, 'email']
+    [name, normalizedEmail, hash, role, now, ip, userAgent, 'email']
   );
 
-  await logAudit({ email, action: 'Account Registered', ip, userAgent, status: 'success', details: `Role: ${role}` });
-  const user = { id: result.lastID, name, email, role };
+  await logAudit({ email: normalizedEmail, action: 'Account Registered', ip, userAgent, status: 'success', details: `Role: ${role}` });
+  const user = { id: result.lastID, name, email: normalizedEmail, role };
   const token = jwt.sign(user, SECRET, { expiresIn: '7d' });
   return { token, user };
 };
@@ -54,9 +61,10 @@ const loginUser = async ({ email, password, ip, userAgent }) => {
     throw { status: 400, message: 'Email and password are required.' };
   }
 
-  const user = await queryGet('SELECT * FROM users WHERE email = ?', [email]);
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await queryGet('SELECT * FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
   if (!user || !user.password || !bcrypt.compareSync(password, user.password)) {
-    await logAudit({ email, action: 'Email Login Failed', ip, userAgent, status: 'failed', details: 'Invalid credentials' });
+    await logAudit({ email: normalizedEmail, action: 'Email Login Failed', ip, userAgent, status: 'failed', details: 'Invalid credentials' });
     throw { status: 401, message: 'Invalid email or password.' };
   }
 
@@ -66,7 +74,7 @@ const loginUser = async ({ email, password, ip, userAgent }) => {
     [now, ip, userAgent, user.id]
   );
 
-  await logAudit({ email, action: 'Email Login Success', ip, userAgent, status: 'success', details: `Role: ${user.role}` });
+  await logAudit({ email: normalizedEmail, action: 'Email Login Success', ip, userAgent, status: 'success', details: `Role: ${user.role}` });
   const payload = { id: user.id, name: user.name, email: user.email, role: user.role };
   const token = jwt.sign(payload, SECRET, { expiresIn: '7d' });
   return { token, user: payload };
@@ -75,35 +83,40 @@ const loginUser = async ({ email, password, ip, userAgent }) => {
 const authenticateGoogle = async ({ credential, ip, userAgent }) => {
   if (!credential) throw { status: 400, message: 'Credential payload is required.' };
 
-  const ticket = await googleClient.verifyIdToken({
-    idToken: credential,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
+  let payload;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_IDS,
+    });
+    payload = ticket.getPayload();
+  } catch (verifyErr) {
+    console.error('[GOOGLE AUTH VERIFICATION ERROR]', verifyErr);
+    throw { status: 401, message: `Google authentication verification failed: ${verifyErr.message}` };
+  }
 
-  const payload = ticket.getPayload();
   const { sub: google_id, email, name } = payload;
+  const normalizedEmail = (email || '').trim().toLowerCase();
   const now = new Date().toISOString();
 
-  let user = await queryGet('SELECT * FROM users WHERE email = ?', [email]);
+  let user = await queryGet('SELECT * FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
 
   if (user) {
-    // Self-heal: if this email is listed in ADMIN_EMAILS but the stored role hasn't
-    // caught up yet (e.g. added to the list after the account was created), promote it.
-    const shouldBeAdmin = resolveRole(email) === 'admin' && user.role !== 'admin';
+    const shouldBeAdmin = resolveRole(normalizedEmail) === 'admin' && user.role !== 'admin';
     await queryRun(
       `UPDATE users SET google_id=COALESCE(google_id,?), last_login=?, login_count=COALESCE(login_count,0)+1, last_ip=?, last_device=?, auth_method='google'${shouldBeAdmin ? ", role='admin'" : ''} WHERE id=?`,
       [google_id, now, ip, userAgent, user.id]
     );
     if (shouldBeAdmin) user.role = 'admin';
-    await logAudit({ email, action: 'Google Login Success', ip, userAgent, status: 'success', details: `Role: ${user.role}` });
+    await logAudit({ email: normalizedEmail, action: 'Google Login Success', ip, userAgent, status: 'success', details: `Role: ${user.role}` });
   } else {
-    const assignRole = resolveRole(email);
+    const assignRole = resolveRole(normalizedEmail);
     const result = await queryRun(
       `INSERT INTO users (name, email, google_id, role, created_at, last_login, login_count, last_ip, last_device, auth_method) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
-      [name, email, google_id, assignRole, now, now, ip, userAgent, 'google']
+      [name || 'Guest User', normalizedEmail, google_id, assignRole, now, now, ip, userAgent, 'google']
     );
-    user = { id: result.lastID, name, email, role: assignRole };
-    await logAudit({ email, action: 'Google Register & Login', ip, userAgent, status: 'success', details: `New ${assignRole} account` });
+    user = { id: result.lastID, name: name || 'Guest User', email: normalizedEmail, role: assignRole };
+    await logAudit({ email: normalizedEmail, action: 'Google Register & Login', ip, userAgent, status: 'success', details: `New ${assignRole} account` });
   }
 
   const userPayload = { id: user.id, name: user.name, email: user.email, role: user.role };
