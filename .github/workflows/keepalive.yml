@@ -1,0 +1,28 @@
+name: Free-Tier Backend & Database Keepalive
+
+on:
+  schedule:
+    # Runs every 3 days at 06:00 UTC
+    - cron: '0 6 */3 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping-health:
+    name: Ping Health Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping House of Varsh Backend Health
+        env:
+          BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
+        run: |
+          TARGET_URL="${BACKEND_URL:-https://house-of-varsh-api.onrender.com}/api/health"
+          echo "Pinging health check at: $TARGET_URL"
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$TARGET_URL" || true)
+          echo "$RESPONSE"
+          
+          STATUS_CODE=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d':' -f2)
+          if [ "$STATUS_CODE" = "200" ]; then
+            echo "✅ Keepalive succeeded: Backend and Database are awake!"
+          else
+            echo "⚠️ Notice: Server returned status $STATUS_CODE (might be spinning up from cold start)"
+          fi

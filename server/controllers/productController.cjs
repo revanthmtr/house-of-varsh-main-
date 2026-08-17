@@ -2,7 +2,7 @@ const productService = require('../services/productService.cjs');
 
 const getProducts = async (req, res, next) => {
   try {
-    const products = await productService.getAllProducts();
+    const products = await productService.getAllProducts(req.query);
     res.json(products);
   } catch (err) {
     next(err);

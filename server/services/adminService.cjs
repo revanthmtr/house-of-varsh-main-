@@ -18,8 +18,8 @@ const getAllUsers = async () => {
   return await queryAll(query);
 };
 
-const getAllOrders = async () => {
-  return await orderService.getAllOrders();
+const getAllOrders = async (opts) => {
+  return await orderService.getAllOrders(opts);
 };
 
 module.exports = {

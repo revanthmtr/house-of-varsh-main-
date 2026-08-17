@@ -4,6 +4,25 @@ import App from './App.tsx'
 import './index.css'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
+// ── Global API URL Routing for Production Hosting (GoDaddy / Render) ────────
+const API_URL = (import.meta.env.VITE_API_URL || '').trim();
+
+if (API_URL && typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
+    if (typeof input === 'string') {
+      if (input.startsWith('/api') || input.startsWith('/uploads')) {
+        input = `${API_URL.replace(/\/$/, '')}${input}`;
+      }
+    } else if (input instanceof URL) {
+      if (input.pathname.startsWith('/api') || input.pathname.startsWith('/uploads')) {
+        input = new URL(`${API_URL.replace(/\/$/, '')}${input.pathname}${input.search}`);
+      }
+    }
+    return originalFetch.call(this, input, init);
+  };
+}
+
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
   '303025946632-vih404g8jdfgs09rsvfbjnt80d5argia.apps.googleusercontent.com'

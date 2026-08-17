@@ -46,5 +46,6 @@ venv/
 django_backend/venv/
 cpanel-media-admin/node_modules/
 scratch/
-*.log
+# archives
+*.zip
 

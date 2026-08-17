@@ -1,13 +1,32 @@
 const { queryAll, queryRun } = require('../config/db.cjs');
 
-const getAllProducts = async () => {
-  return await queryAll('SELECT * FROM products ORDER BY id DESC');
+const getAllProducts = async ({ page, limit, category } = {}) => {
+  let sql = 'SELECT * FROM products';
+  const params = [];
+
+  if (category) {
+    sql += ' WHERE category = ?';
+    params.push(category);
+  }
+
+  sql += ' ORDER BY id DESC';
+
+  if (limit) {
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 20);
+    const offset = (pageNum - 1) * limitNum;
+
+    sql += ' LIMIT ? OFFSET ?';
+    params.push(limitNum, offset);
+  }
+
+  return await queryAll(sql, params);
 };
 
 const createProduct = async ({ name, price, category, img, badge }) => {
   const result = await queryRun(
     'INSERT INTO products (name, price, category, img, badge) VALUES (?, ?, ?, ?, ?)',
-    [name, price, category, img, badge]
+    [name, price, category, img, badge || null]
   );
   return { id: result.lastID, name, price, category, img, badge };
 };
@@ -15,7 +34,7 @@ const createProduct = async ({ name, price, category, img, badge }) => {
 const updateProduct = async (id, { name, price, category, img, badge }) => {
   await queryRun(
     'UPDATE products SET name = ?, price = ?, category = ?, img = ?, badge = ? WHERE id = ?',
-    [name, price, category, img, badge, id]
+    [name, price, category, img, badge || null, id]
   );
   return { id, name, price, category, img, badge };
 };

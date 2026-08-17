@@ -21,7 +21,7 @@ const getUsers = async (req, res, next) => {
 
 const getOrders = async (req, res, next) => {
   try {
-    const orders = await adminService.getAllOrders();
+    const orders = await adminService.getAllOrders(req.query);
     res.json(orders);
   } catch (err) {
     next(err);

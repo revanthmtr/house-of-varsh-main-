@@ -1,4 +1,4 @@
-const { queryAll, queryGet, queryRun } = require('../config/db.cjs');
+const { queryAll, queryGet, queryRun, withTransaction } = require('../config/db.cjs');
 
 const VALID_STATUSES = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 
@@ -7,11 +7,8 @@ const parsePrice = (priceStr) => {
   return isNaN(n) ? 0 : n;
 };
 
-// Creates a real order from the user's current cart, snapshotting item details
-// (name/price/img) so the order stays accurate even if a product is edited or
-// deleted later. Clears the cart on success. Everything runs as one logical
-// transaction — if item snapshotting fails partway, nothing is left dangling
-// because we only clear the cart after all inserts succeed.
+// Creates a real order from the user's current cart within an atomic transaction.
+// Snapshots item details (name/price/img) and clears the cart upon completion.
 const createOrderFromCart = async (userId, shipping) => {
   const { name, phone, address, city, pincode, notes, payment_method } = shipping || {};
 
@@ -19,33 +16,35 @@ const createOrderFromCart = async (userId, shipping) => {
     throw { status: 400, message: 'Shipping name, phone, and address are required.' };
   }
 
-  const cartItems = await queryAll('SELECT * FROM cart_items WHERE user_id = ?', [userId]);
-  if (cartItems.length === 0) {
-    throw { status: 400, message: 'Your cart is empty.' };
-  }
+  return await withTransaction(async ({ queryAll: txQueryAll, queryRun: txQueryRun }) => {
+    const cartItems = await txQueryAll('SELECT * FROM cart_items WHERE user_id = ?', [userId]);
+    if (cartItems.length === 0) {
+      throw { status: 400, message: 'Your cart is empty.' };
+    }
 
-  const totalAmount = cartItems.reduce((sum, item) => sum + parsePrice(item.price), 0);
+    const totalAmount = cartItems.reduce((sum, item) => sum + parsePrice(item.price), 0);
 
-  const orderResult = await queryRun(
-    `INSERT INTO orders
-      (user_id, status, payment_method, total_amount, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_pincode, notes)
-     VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [userId, payment_method || 'cod', totalAmount, name, phone, address, city || null, pincode || null, notes || null]
-  );
-
-  const orderId = orderResult.lastID;
-
-  for (const item of cartItems) {
-    await queryRun(
-      `INSERT INTO order_items (order_id, product_id, name, price, img, category, quantity)
-       VALUES (?, ?, ?, ?, ?, ?, 1)`,
-      [orderId, item.product_id, item.name, item.price, item.img, item.category]
+    const orderResult = await txQueryRun(
+      `INSERT INTO orders
+        (user_id, status, payment_method, total_amount, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_pincode, notes)
+       VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, payment_method || 'cod', totalAmount, name, phone, address, city || null, pincode || null, notes || null]
     );
-  }
 
-  await queryRun('DELETE FROM cart_items WHERE user_id = ?', [userId]);
+    const orderId = orderResult.lastID;
 
-  return await getOrderById(orderId, userId);
+    for (const item of cartItems) {
+      await txQueryRun(
+        `INSERT INTO order_items (order_id, product_id, name, price, img, category, quantity)
+         VALUES (?, ?, ?, ?, ?, ?, 1)`,
+        [orderId, item.product_id, item.name, item.price, item.img, item.category]
+      );
+    }
+
+    await txQueryRun('DELETE FROM cart_items WHERE user_id = ?', [userId]);
+
+    return await getOrderById(orderId, userId);
+  });
 };
 
 const getOrderById = async (orderId, userId = null) => {
@@ -61,8 +60,9 @@ const getOrderById = async (orderId, userId = null) => {
 
 const getUserOrders = async (userId) => {
   const orders = await queryAll('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC', [userId]);
+  if (orders.length === 0) return [];
   const items = await queryAll(
-    `SELECT * FROM order_items WHERE order_id IN (${orders.map(() => '?').join(',') || '0'})`,
+    `SELECT * FROM order_items WHERE order_id IN (${orders.map(() => '?').join(',')})`,
     orders.map((o) => o.id)
   );
   return orders.map((order) => ({
@@ -71,14 +71,24 @@ const getUserOrders = async (userId) => {
   }));
 };
 
-const getAllOrders = async () => {
-  const query = `
+const getAllOrders = async ({ page, limit } = {}) => {
+  let query = `
     SELECT o.*, u.name as user_name, u.email as user_email
     FROM orders o
     LEFT JOIN users u ON o.user_id = u.id
     ORDER BY o.id DESC
   `;
-  const orders = await queryAll(query);
+  const params = [];
+
+  if (limit) {
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 20);
+    const offset = (pageNum - 1) * limitNum;
+    query += ' LIMIT ? OFFSET ?';
+    params.push(limitNum, offset);
+  }
+
+  const orders = await queryAll(query, params);
   if (orders.length === 0) return [];
   const items = await queryAll(
     `SELECT * FROM order_items WHERE order_id IN (${orders.map(() => '?').join(',')})`,
