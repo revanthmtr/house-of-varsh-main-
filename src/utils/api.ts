@@ -25,6 +25,22 @@ export const resolveApiUrl = (endpoint: string): string => {
 };
 
 /**
+ * Resolves media paths (especially uploaded files /uploads/...) to full backend URLs
+ */
+export const resolveMediaUrl = (url: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
+    return url;
+  }
+  if (url.startsWith('/uploads')) {
+    const base = getApiBaseUrl();
+    return base ? `${base}${url}` : url;
+  }
+  return url;
+};
+
+
+/**
  * Bulletproof JSON fetcher — guarantees it NEVER throws JSON parse SyntaxError on HTML responses
  */
 export async function safeFetchJson<T = any>(

@@ -4,7 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Image as ImageIcon, LayoutDashboard, Package, FileEdit, ShoppingBag, Users as UsersIcon, LogOut, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSiteContent } from '../context/SiteContentContext';
+import { resolveMediaUrl } from '../utils/api';
 import './AdminPanel.css';
+
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -313,10 +315,11 @@ const SiteContentEditor: React.FC = () => {
                     <div className="ap-image-field">
                       {val && (
                         <div className="ap-image-preview">
-                          <img src={val} alt={fieldLabel} onError={e => (e.currentTarget.style.display = 'none')} />
+                          <img src={resolveMediaUrl(val)} alt={fieldLabel} onError={e => (e.currentTarget.style.display = 'none')} />
                         </div>
                       )}
                       <div className="ap-input-with-btn">
+
                         <input
                           type="text"
                           className="ap-input"
@@ -862,9 +865,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                             {formData.img && (
                               <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                 {formData.img.endsWith('.mp4') || formData.img.endsWith('.webm') ? (
-                                  <video src={formData.img} autoPlay loop muted playsInline style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--ap-gold)' }} />
+                                  <video src={resolveMediaUrl(formData.img)} autoPlay loop muted playsInline style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--ap-gold)' }} />
                                 ) : (
-                                  <img src={formData.img} alt="Preview" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--ap-gold)' }} onError={(e) => { (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'; }} />
+                                  <img src={resolveMediaUrl(formData.img)} alt="Preview" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--ap-gold)' }} onError={(e) => { (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'; }} />
                                 )}
                                 <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>Media ready</span>
                               </div>
@@ -889,10 +892,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                       {products.map(product => (
                         <div className="ap-product-card" key={product.id}>
                           {product.img && (product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov')) ? (
-                            <video src={product.img} autoPlay loop muted playsInline style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px' }} />
+                            <video src={resolveMediaUrl(product.img)} autoPlay loop muted playsInline style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px' }} />
                           ) : (
                             <img
-                              src={product.img}
+                              src={resolveMediaUrl(product.img)}
                               alt={product.name}
                               loading="lazy"
                               decoding="async"
@@ -901,6 +904,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                               }}
                             />
                           )}
+
                           <div className="ap-info">
                             <h4>{product.name}</h4>
                             <span>{product.price} // {product.category?.toUpperCase() || 'NEW'}</span>

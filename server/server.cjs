@@ -140,13 +140,17 @@ app.post('/api/upload', authenticate, requireAdmin, upload.single('image'), asyn
       );
       uploadStream.end(req.file.buffer);
     } else {
-      // Local fallback
-      const url = `/uploads/${req.file.filename}`;
-      res.json({ url, filename: req.file.filename });
+      // Local fallback — Return absolute URL with host so frontend on another domain can load it directly
+      const host = req.get('host');
+      const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+      const baseUrl = process.env.BASE_URL || `${protocol}://${host}`;
+      const url = `${baseUrl}/uploads/${req.file.filename}`;
+      res.json({ url, relativeUrl: `/uploads/${req.file.filename}`, filename: req.file.filename });
     }
   } catch (err) {
     next(err);
   }
+
 });
 
 // ── Mount Routes ─────────────────────────────────────────────────────────────

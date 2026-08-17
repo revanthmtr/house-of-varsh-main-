@@ -4,7 +4,9 @@ import { Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteContent } from '../context/SiteContentContext';
 import { DEFAULT_PRODUCTS, type Product } from '../data/defaultProducts';
+import { resolveMediaUrl } from '../utils/api';
 import './LatestCollection.css';
+
 
 const LatestCollection = () => {
   const [activeTab, setActiveTab] = useState('new');
@@ -101,7 +103,7 @@ const LatestCollection = () => {
 
                   {product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov') ? (
                     <video 
-                      src={product.img} 
+                      src={resolveMediaUrl(product.img)} 
                       className="product-image" 
                       autoPlay 
                       loop 
@@ -112,7 +114,7 @@ const LatestCollection = () => {
                     />
                   ) : (
                     <img 
-                      src={product.img} 
+                      src={resolveMediaUrl(product.img)} 
                       alt={product.name} 
                       className="product-image" 
                       loading="lazy" 
@@ -122,6 +124,7 @@ const LatestCollection = () => {
                       }}
                     />
                   )}
+
                   
                   <div
                     className="quick-add-overlay"

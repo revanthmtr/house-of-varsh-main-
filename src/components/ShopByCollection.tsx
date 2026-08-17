@@ -4,7 +4,9 @@ import { Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteContent } from '../context/SiteContentContext';
 import { DEFAULT_PRODUCTS, type Product } from '../data/defaultProducts';
+import { resolveMediaUrl } from '../utils/api';
 import './ShopByCollection.css';
+
 
 const defaultNewArrivals = DEFAULT_PRODUCTS.filter(p => p.category === 'new');
 
@@ -82,7 +84,7 @@ const ShopByCollection = () => {
               <div className="product-image-wrapper">
                 {product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov') ? (
                   <video
-                    src={product.img}
+                    src={resolveMediaUrl(product.img)}
                     autoPlay
                     loop
                     muted
@@ -93,7 +95,7 @@ const ShopByCollection = () => {
                   />
                 ) : (
                   <img
-                    src={product.img}
+                    src={resolveMediaUrl(product.img)}
                     alt={product.name}
                     loading="lazy"
                     decoding="async"
@@ -103,6 +105,7 @@ const ShopByCollection = () => {
                     }}
                   />
                 )}
+
                 
                 {product.badge && (
                   <span className="product-card-badge">
