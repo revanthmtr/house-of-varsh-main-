@@ -2,8 +2,9 @@
   RewriteEngine On
   RewriteBase /
 
-  # Force HTTPS Redirection (Removes "Not Secure" warning in browser)
-  RewriteCond %{HTTPS} off
+  # Robust HTTPS Enforcement for cPanel / Apache / Reverse Proxies / Cloudflare
+  RewriteCond %{HTTPS} !=on [NC]
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
   # Serve existing static files or directories directly
@@ -13,4 +14,9 @@
 
   # Single Page Application (SPA) routing for React
   RewriteRule ^ index.html [L]
+</IfModule>
+
+# Force HSTS (HTTP Strict Transport Security) to prevent browser ever loading over HTTP
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 </IfModule>
