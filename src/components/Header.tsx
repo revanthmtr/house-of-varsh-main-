@@ -1,16 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
-import { Search, ShoppingBag, User, LogOut, LayoutDashboard, ChevronDown, Menu, X } from 'lucide-react';
+import { Search, ShoppingBag, User, LogOut, LayoutDashboard, ChevronDown, Menu, X, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useSiteContent } from '../context/SiteContentContext';
 import AuthModal from './AuthModal';
 import AdminPanel from './AdminPanel';
+import OrdersModal from './OrdersModal';
 import './Header.css';
 
 const Header = () => {
   const [scrolled, setScrolled]       = useState(false);
   const [isAuthOpen, setIsAuthOpen]   = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [menuOpen, setMenuOpen]       = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef                        = useRef<HTMLDivElement>(null);
@@ -61,6 +63,12 @@ const Header = () => {
     setMenuOpen(false);
     setMobileNavOpen(false);
     setIsAdminOpen(true);
+  };
+
+  const handleOpenOrders = () => {
+    setMenuOpen(false);
+    setMobileNavOpen(false);
+    setIsOrdersOpen(true);
   };
 
   const closeMobileNav = () => setMobileNavOpen(false);
@@ -118,6 +126,12 @@ const Header = () => {
                 </div>
 
                 <div className="user-dropdown-divider" />
+
+                {/* My Orders */}
+                <button className="user-dropdown-item" onClick={handleOpenOrders}>
+                  <Package size={15} />
+                  <span>My Orders</span>
+                </button>
 
                 {/* Admin Panel link — only for admins */}
                 {user.role === 'admin' && (
@@ -196,6 +210,10 @@ const Header = () => {
                   <span className="mobile-user-email">{user.email}</span>
                   {user.role === 'admin' && <span className="mobile-admin-badge">Admin</span>}
                 </div>
+                <button className="mobile-btn-action" onClick={handleOpenOrders}>
+                  <Package size={16} />
+                  <span>My Orders</span>
+                </button>
                 {user.role === 'admin' && (
                   <button className="mobile-btn-action" onClick={handleOpenAdmin}>
                     <LayoutDashboard size={16} />
@@ -219,6 +237,7 @@ const Header = () => {
 
       <AuthModal isOpen={isAuthOpen}  onClose={() => setIsAuthOpen(false)} />
       <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
+      <OrdersModal isOpen={isOrdersOpen} onClose={() => setIsOrdersOpen(false)} />
     </header>
   );
 };
