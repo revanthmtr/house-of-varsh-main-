@@ -10,16 +10,22 @@ const parsePrice = (priceStr) => {
 // Creates a real order from the user's current cart within an atomic transaction.
 // Snapshots item details (name/price/img) and clears the cart upon completion.
 const createOrderFromCart = async (userId, shipping) => {
-  const { name, phone, address, city, pincode, notes, payment_method } = shipping || {};
+  const { name, phone, address, city, pincode, notes, payment_method, items } = shipping || {};
 
   if (!name || !phone || !address) {
     throw { status: 400, message: 'Shipping name, phone, and address are required.' };
   }
 
-  return await withTransaction(async ({ queryAll: txQueryAll, queryRun: txQueryRun }) => {
-    const cartItems = await txQueryAll('SELECT * FROM cart_items WHERE user_id = ?', [userId]);
+  const orderId = await withTransaction(async ({ queryAll: txQueryAll, queryRun: txQueryRun }) => {
+    let cartItems = await txQueryAll('SELECT * FROM cart_items WHERE user_id = ?', [userId]);
+    
+    // If cart table was empty but items were passed in shipping payload, use payload items
+    if (cartItems.length === 0 && Array.isArray(items) && items.length > 0) {
+      cartItems = items;
+    }
+
     if (cartItems.length === 0) {
-      throw { status: 400, message: 'Your cart is empty.' };
+      throw { status: 400, message: 'Your bag is empty.' };
     }
 
     const totalAmount = cartItems.reduce((sum, item) => sum + parsePrice(item.price), 0);
@@ -31,21 +37,25 @@ const createOrderFromCart = async (userId, shipping) => {
       [userId, payment_method || 'cod', totalAmount, name, phone, address, city || null, pincode || null, notes || null]
     );
 
-    const orderId = orderResult.lastID;
+    const newOrderId = orderResult.lastID;
 
     for (const item of cartItems) {
       await txQueryRun(
         `INSERT INTO order_items (order_id, product_id, name, price, img, category, quantity)
          VALUES (?, ?, ?, ?, ?, ?, 1)`,
-        [orderId, item.product_id, item.name, item.price, item.img, item.category]
+        [newOrderId, item.product_id || 0, item.name, String(item.price), item.img || '', item.category || 'new']
       );
     }
 
     await txQueryRun('DELETE FROM cart_items WHERE user_id = ?', [userId]);
 
-    return await getOrderById(orderId, userId);
+    return newOrderId;
   });
+
+  // Query order AFTER transaction commits so PostgreSQL Read Committed isolation finds the record
+  return await getOrderById(orderId, userId);
 };
+
 
 const getOrderById = async (orderId, userId = null) => {
   const order = userId

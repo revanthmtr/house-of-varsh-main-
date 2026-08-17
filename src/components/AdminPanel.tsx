@@ -658,26 +658,52 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                           <tbody>
                             {orders.map(o => (
                               <tr key={o.id}>
-                                <td style={{fontFamily: 'monospace', opacity: 0.7}}>
-                                  #{o.id.toString().padStart(4, '0')}
-                                  <br/><span style={{opacity: 0.5, fontSize: '0.7rem'}}>{new Date(o.created_at).toLocaleDateString('en-IN')}</span>
+                                <td style={{fontFamily: 'monospace', color: 'var(--ap-gold-light)'}}>
+                                  <strong>#{o.id.toString().padStart(4, '0')}</strong>
+                                  <br/><span style={{opacity: 0.6, fontSize: '0.72rem'}}>{new Date(o.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                 </td>
-                                <td><strong>{o.user_name || 'Guest'}</strong><br/><span style={{opacity: 0.5, fontSize: '0.8rem'}}>{o.user_email}</span></td>
                                 <td>
-                                  {(o.items || []).map(item => (
-                                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
-                                      <img src={item.img} alt={item.name} style={{width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0}} />
-                                      <span style={{ fontSize: '0.8rem' }}>{item.name}</span>
+                                  <strong>{o.user_name || o.shipping_name || 'Valued Client'}</strong>
+                                  <br/><span style={{opacity: 0.6, fontSize: '0.78rem'}}>{o.user_email || '—'}</span>
+                                </td>
+                                <td>
+                                  {(o.items || []).map((item, idx) => (
+                                    <div key={item.id || idx} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+                                      {item.img && (item.img.endsWith('.mp4') || item.img.endsWith('.webm')) ? (
+                                        <video src={item.img} autoPlay loop muted playsInline style={{width: '34px', height: '34px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0, border: '1px solid var(--ap-gold-border)'}} />
+                                      ) : (
+                                        <img
+                                          src={item.img || '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'}
+                                          alt={item.name}
+                                          style={{width: '34px', height: '34px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0, border: '1px solid var(--ap-gold-border)'}}
+                                          onError={(e) => { (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg'; }}
+                                        />
+                                      )}
+                                      <div style={{ lineHeight: '1.2' }}>
+                                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--ap-text-light)' }}>{item.name}</div>
+                                        <div style={{ fontSize: '0.74rem', color: 'var(--ap-gold)' }}>{item.price}</div>
+                                      </div>
                                     </div>
                                   ))}
                                 </td>
-                                <td style={{ fontSize: '0.8rem', maxWidth: '180px' }}>
-                                  <strong>{o.shipping_name}</strong><br/>
-                                  {o.shipping_phone}<br/>
-                                  <span style={{ opacity: 0.7 }}>{o.shipping_address}{o.shipping_city ? `, ${o.shipping_city}` : ''} {o.shipping_pincode || ''}</span>
+                                <td style={{ fontSize: '0.82rem', maxWidth: '200px' }}>
+                                  <strong style={{ color: 'var(--ap-gold-light)' }}>{o.shipping_name}</strong><br/>
+                                  <span style={{ color: 'var(--ap-text-light)' }}>📞 {o.shipping_phone}</span><br/>
+                                  <span style={{ opacity: 0.75, display: 'block', marginTop: '2px', lineHeight: '1.3' }}>
+                                    {o.shipping_address}{o.shipping_city ? `, ${o.shipping_city}` : ''} {o.shipping_pincode ? `— ${o.shipping_pincode}` : ''}
+                                  </span>
+                                  {o.notes && (
+                                    <div style={{ marginTop: '4px', fontSize: '0.72rem', color: 'var(--ap-gold)', fontStyle: 'italic' }}>
+                                      Note: {o.notes}
+                                    </div>
+                                  )}
                                 </td>
-                                <td><strong>&#8377;{Number(o.total_amount).toLocaleString('en-IN')}</strong></td>
-                                <td style={{ textTransform: 'uppercase', fontSize: '0.75rem', opacity: 0.7 }}>{o.payment_method}</td>
+                                <td><strong style={{ color: 'var(--ap-gold-light)', fontSize: '0.95rem' }}>&#8377;{Number(o.total_amount).toLocaleString('en-IN')}</strong></td>
+                                <td>
+                                  <span style={{ textTransform: 'uppercase', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(212,175,55,0.12)', color: 'var(--ap-gold)' }}>
+                                    {o.payment_method || 'COD'}
+                                  </span>
+                                </td>
                                 <td>
                                   <select
                                     value={o.status}
@@ -694,8 +720,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                                 </td>
                               </tr>
                             ))}
-                            {orders.length === 0 && <tr><td colSpan={7} style={{ textAlign: 'center', opacity: 0.5, padding: '3rem' }}>No orders yet.</td></tr>}
+                            {orders.length === 0 && <tr><td colSpan={7} style={{ textAlign: 'center', opacity: 0.5, padding: '3rem' }}>No orders placed yet.</td></tr>}
                           </tbody>
+
                         </table>
                       </div>
                     </div>

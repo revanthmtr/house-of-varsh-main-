@@ -92,22 +92,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const checkout = async (shipping: ShippingDetails) => {
-    if (!token || cart.length === 0) return { success: false, error: 'Your bag is empty.' };
+    if (!token) return { success: false, error: 'Please sign in to place your order.' };
+    if (cart.length === 0) return { success: false, error: 'Your bag is empty.' };
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(shipping)
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ...shipping, items: cart })
       });
-      const data = await res.json();
-      if (!res.ok) return { success: false, error: data.error || 'Checkout failed. Please try again.' };
+
+      let data: any = {};
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json().catch(() => ({}));
+      }
+
+      if (!res.ok) {
+        return { success: false, error: data.error || data.message || `Order placement failed (${res.status})` };
+      }
       setCart([]);
       return { success: true, orderId: data.order?.id };
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      return { success: false, error: 'Checkout failed. Please try again.' };
+      return { success: false, error: err.message || 'Unable to connect to order server. Please try again.' };
     }
   };
+
 
   const cartTotal = cart.reduce((total, item) => {
     const p = parseFloat(String(item.price).replace(/[^0-9.]/g, ''));
