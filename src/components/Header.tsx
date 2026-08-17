@@ -28,6 +28,15 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Detect reset_token parameter in URL and pop open AuthModal
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('reset_token')) {
+      setIsAuthOpen(true);
+    }
+  }, []);
+
+
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {

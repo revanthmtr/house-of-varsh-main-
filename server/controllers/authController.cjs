@@ -33,13 +33,35 @@ const googleAuth = async (req, res, next) => {
   }
 };
 
-const getMe = async (req, res) => {
-  res.json({ user: req.user });
+const forgotPassword = async (req, res, next) => {
+  try {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const origin = req.headers.origin || `${req.protocol}://${req.get('host')}`;
+    const result = await authService.requestPasswordReset({ ...req.body, origin, ip, userAgent });
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const result = await authService.resetPassword({ ...req.body, ip, userAgent });
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports = {
   register,
   login,
   googleAuth,
+  forgotPassword,
+  resetPassword,
   getMe,
 };
+

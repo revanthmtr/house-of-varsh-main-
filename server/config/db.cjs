@@ -17,6 +17,12 @@ if (process.env.DATABASE_URL) {
     console.error('Unexpected error on idle PostgreSQL client', err);
   });
 
+  // Auto-migrate schema additions for PostgreSQL
+  pool.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_token TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires TIMESTAMPTZ;
+  `).catch(err => console.error('[DATABASE] PostgreSQL auto-migration notice:', err.message));
+
   console.log('[DATABASE] Initialized PostgreSQL connection pool.');
 } else {
   console.log('[DATABASE] DATABASE_URL not set. Falling back to local SQLite database.');
@@ -27,9 +33,12 @@ if (process.env.DATABASE_URL) {
       console.error('Error connecting to SQLite database:', err.message);
     } else {
       console.log('Connected to SQLite database at:', DB_PATH);
+      sqliteDb.run('ALTER TABLE users ADD COLUMN reset_password_token TEXT', () => {});
+      sqliteDb.run('ALTER TABLE users ADD COLUMN reset_password_expires TEXT', () => {});
     }
   });
 }
+
 
 /**
  * Transforms standard SQLite-style SQL statements into PostgreSQL-compliant queries:

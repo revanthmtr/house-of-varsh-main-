@@ -337,6 +337,55 @@
 }
 .auth-trust-sep { color: rgba(18,18,18,0.2); font-size: 0.75rem; }
 
+/* ── Password Reset Specific Styles ── */
+.auth-forgot-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.74rem;
+  color: #BFA15F;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+.auth-forgot-link:hover {
+  color: #8c6e26;
+  text-decoration: underline;
+}
+
+.auth-back-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  color: rgba(18,18,18,0.55);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.2s;
+  margin-top: 0.8rem;
+}
+.auth-back-btn:hover {
+  color: #BFA15F;
+}
+
+.auth-notice-card {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #121212;
+  text-align: center;
+  margin: 1rem 0 1.5rem;
+}
+
 @media (max-width: 640px) {
   .auth-overlay {
     padding: 0.5rem;
@@ -351,3 +400,4 @@
     font-size: 1.4rem;
   }
 }
+

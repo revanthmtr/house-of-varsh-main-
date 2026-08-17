@@ -124,9 +124,124 @@ const authenticateGoogle = async ({ credential, ip, userAgent }) => {
   return { token, user: userPayload };
 };
 
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('./mailService.cjs');
+
+const requestPasswordReset = async ({ email, origin, ip, userAgent }) => {
+  if (!email) {
+    throw { status: 400, message: 'Email address is required.' };
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await queryGet('SELECT * FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
+
+  if (user) {
+    // Generate 32-byte high-entropy token
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes validity
+
+    await queryRun(
+      'UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE id = ?',
+      [hashedToken, expiresAt, user.id]
+    );
+
+    const baseUrl = (origin || process.env.FRONTEND_URL || 'https://houseofvarsh.com').replace(/\/$/, '');
+    const resetUrl = `${baseUrl}/?reset_token=${rawToken}`;
+
+    await sendPasswordResetEmail({
+      to: normalizedEmail,
+      resetUrl,
+      clientName: user.name,
+    });
+
+    await logAudit({
+      email: normalizedEmail,
+      action: 'Password Reset Requested',
+      ip,
+      userAgent,
+      status: 'success',
+      details: 'Reset token dispatched'
+    });
+  } else {
+    await logAudit({
+      email: normalizedEmail,
+      action: 'Password Reset Probed',
+      ip,
+      userAgent,
+      status: 'failed',
+      details: 'Email not found in database'
+    });
+  }
+
+  // Consistent message returned always (OWASP anti-enumeration standard)
+  return {
+    success: true,
+    message: 'If an account exists with this email address, a password reset link has been dispatched to your inbox.'
+  };
+};
+
+const resetPassword = async ({ token, newPassword, ip, userAgent }) => {
+  if (!token) {
+    throw { status: 400, message: 'Reset token is required.' };
+  }
+  if (!newPassword || newPassword.length < 6) {
+    throw { status: 400, message: 'New password must be at least 6 characters in length.' };
+  }
+
+  const hashedToken = crypto.createHash('sha256').update(token.trim()).digest('hex');
+  const nowIso = new Date().toISOString();
+
+  // Find user by hashed token and verify non-expired
+  const user = await queryGet(
+    'SELECT * FROM users WHERE reset_password_token = ?',
+    [hashedToken]
+  );
+
+  if (!user || !user.reset_password_expires) {
+    await logAudit({ email: 'unknown', action: 'Password Reset Failed', ip, userAgent, status: 'failed', details: 'Token not found' });
+    throw { status: 400, message: 'Password reset link is invalid. Please request a new one.' };
+  }
+
+  const expiryTime = new Date(user.reset_password_expires).getTime();
+  if (Date.now() > expiryTime) {
+    await logAudit({ email: user.email, action: 'Password Reset Expired', ip, userAgent, status: 'failed', details: 'Token expired' });
+    throw { status: 400, message: 'This password reset link has expired. Please request a fresh reset link.' };
+  }
+
+  const newHash = bcrypt.hashSync(newPassword, 10);
+
+  await queryRun(
+    `UPDATE users SET password = ?, reset_password_token = NULL, reset_password_expires = NULL, last_login = ?, last_ip = ?, last_device = ?, auth_method = 'email' WHERE id = ?`,
+    [newHash, nowIso, ip, userAgent, user.id]
+  );
+
+  await logAudit({
+    email: user.email,
+    action: 'Password Reset Success',
+    ip,
+    userAgent,
+    status: 'success',
+    details: 'Password updated and user authenticated'
+  });
+
+  const payload = { id: user.id, name: user.name, email: user.email, role: user.role };
+  const freshToken = jwt.sign(payload, SECRET, { expiresIn: '7d' });
+
+  return {
+    success: true,
+    message: 'Your password has been successfully updated.',
+    token: freshToken,
+    user: payload,
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
   authenticateGoogle,
+  requestPasswordReset,
+  resetPassword,
   logAudit,
 };
+

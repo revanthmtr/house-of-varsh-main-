@@ -75,11 +75,22 @@ const bulkUpdateContentSchema = z.object({
   fields: z.record(z.any(), { required_error: 'fields object is required' }),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Valid email is required'),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
 module.exports = {
   validate,
   registerSchema,
   loginSchema,
   googleAuthSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   productSchema,
   addToCartSchema,
   checkoutSchema,
@@ -87,3 +98,4 @@ module.exports = {
   updateContentSchema,
   bulkUpdateContentSchema,
 };
+
