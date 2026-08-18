@@ -211,17 +211,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Cash on Delivery / Standard Checkout
    */
   const checkout = async (shipping: ShippingDetails) => {
-    if (!token) return { success: false, error: 'Please sign in or create an account to place your order.' };
     if (cart.length === 0) return { success: false, error: 'Your bag is currently empty.' };
+
+    const activeToken = token || localStorage.getItem('hov_token') || localStorage.getItem('chinni_token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    if (activeToken) {
+      headers['Authorization'] = `Bearer ${activeToken}`;
+    }
 
     try {
       const res = await fetch(resolveApiUrl('/api/checkout'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
         body: JSON.stringify({ ...shipping, items: cart }),
       });
 
@@ -237,13 +241,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('hov_guest_cart');
         return { success: true, orderId: data.order?.id };
       } else {
-        return { success: false, error: data.error || 'Failed to place order. Please try again.' };
+        return { success: false, error: data.error || data.message || 'Failed to place order. Please try again.' };
       }
     } catch (err: any) {
       console.error('Checkout network error:', err);
       return { success: false, error: 'Network error connecting to server. Please try again.' };
     }
   };
+
 
   // Cart total computation in INR
   const cartTotal = cart.reduce((sum, item) => {

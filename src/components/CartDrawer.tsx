@@ -73,13 +73,15 @@ const CartDrawer: React.FC = () => {
     }
 
     const activeToken = token || localStorage.getItem('hov_token') || localStorage.getItem('chinni_token');
-    if (!activeToken) {
-      setError('Please sign in or create an account to place your order.');
-      return;
+    const authHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    if (activeToken) {
+      authHeaders['Authorization'] = `Bearer ${activeToken}`;
     }
 
     setLoading(true);
-
 
     // ── Razorpay Online Payment Flow ──
     if (paymentMethod === 'razorpay') {
@@ -92,10 +94,7 @@ const CartDrawer: React.FC = () => {
         // 1. Create Razorpay order on backend
         const orderRes = await fetch(resolveApiUrl('/api/payment/create-order'), {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${activeToken}`,
-          },
+          headers: authHeaders,
           body: JSON.stringify({
             amount: cartTotal,
             items: cart,
@@ -104,7 +103,7 @@ const CartDrawer: React.FC = () => {
 
         const orderData = await orderRes.json();
         if (!orderRes.ok) {
-          throw new Error(orderData.error || 'Failed to initiate Razorpay transaction.');
+          throw new Error(orderData.error || orderData.message || 'Failed to initiate Razorpay transaction.');
         }
 
         // 2. Open Razorpay Checkout Modal
@@ -138,10 +137,7 @@ const CartDrawer: React.FC = () => {
               // 3. Verify Payment Signature & Create Confirmed Order on Backend
               const verifyRes = await fetch(resolveApiUrl('/api/payment/verify'), {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${activeToken}`,
-                },
+                headers: authHeaders,
                 body: JSON.stringify({
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_order_id: response.razorpay_order_id,
@@ -150,12 +146,11 @@ const CartDrawer: React.FC = () => {
                 }),
               });
 
-
-
               const verifyData = await verifyRes.json();
               if (!verifyRes.ok) {
-                throw new Error(verifyData.error || 'Payment signature could not be verified.');
+                throw new Error(verifyData.error || verifyData.message || 'Payment signature could not be verified.');
               }
+
 
               setIsRazorpayPaid(true);
               setOrderId(verifyData.order?.id ?? null);

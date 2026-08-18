@@ -19,6 +19,24 @@ const authenticate = (req, res, next) => {
   }
 };
 
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    req.user = decoded;
+  } catch (err) {
+    req.user = null;
+  }
+  next();
+};
+
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Forbidden: Admin privilege required' });
@@ -28,6 +46,8 @@ const requireAdmin = (req, res, next) => {
 
 module.exports = {
   authenticate,
+  optionalAuth,
   requireAdmin,
   SECRET,
 };
+

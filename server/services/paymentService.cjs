@@ -80,8 +80,10 @@ const createVerifiedOrder = async (userId, shipping, paymentDetails) => {
     throw { status: 400, message: 'Shipping name, phone, and address are required.' };
   }
 
+  const sanitizedUserId = userId ? (parseInt(userId, 10) || null) : null;
+
   const orderId = await withTransaction(async ({ queryAll: txQueryAll, queryRun: txQueryRun }) => {
-    let cartItems = await txQueryAll('SELECT * FROM cart_items WHERE user_id = ?', [userId]);
+    let cartItems = sanitizedUserId ? await txQueryAll('SELECT * FROM cart_items WHERE user_id = ?', [sanitizedUserId]) : [];
 
     if (cartItems.length === 0 && Array.isArray(items) && items.length > 0) {
       cartItems = items;
@@ -97,7 +99,7 @@ const createVerifiedOrder = async (userId, shipping, paymentDetails) => {
       `INSERT INTO orders
         (user_id, status, payment_method, payment_id, total_amount, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_pincode, notes)
        VALUES (?, 'confirmed', 'razorpay', ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, razorpay_payment_id, totalAmount, name, phone, address, city || null, pincode || null, notes ? `${notes} (Razorpay Order: ${razorpay_order_id})` : `Razorpay Order: ${razorpay_order_id}`]
+      [sanitizedUserId, razorpay_payment_id, totalAmount, name, phone, address, city || null, pincode || null, notes ? `${notes} (Razorpay Order: ${razorpay_order_id})` : `Razorpay Order: ${razorpay_order_id}`]
     );
 
     const newOrderId = orderResult.lastID;
@@ -110,15 +112,18 @@ const createVerifiedOrder = async (userId, shipping, paymentDetails) => {
       );
     }
 
-    await txQueryRun('DELETE FROM cart_items WHERE user_id = ?', [userId]);
+    if (sanitizedUserId) {
+      await txQueryRun('DELETE FROM cart_items WHERE user_id = ?', [sanitizedUserId]);
+    }
 
     return newOrderId;
   });
 
   const order = await queryGet('SELECT * FROM orders WHERE id = ?', [orderId]);
   const orderItems = await queryAll('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
-  return { ...order, items: orderItems };
+  return { ...(order || { id: orderId, total_amount: 0 }), items: orderItems || [] };
 };
+
 
 module.exports = {
   createRazorpayOrder,

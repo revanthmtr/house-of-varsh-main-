@@ -31,20 +31,22 @@ const removeFromCart = async (req, res, next) => {
 
 const checkout = async (req, res, next) => {
   try {
-    const order = await orderService.createOrderFromCart(req.user.id, req.body);
+    const userId = req.user ? req.user.id : null;
+    const order = await orderService.createOrderFromCart(userId, req.body);
     await logAudit({
-      email: req.user.email,
+      email: req.user?.email || req.body.phone || 'Guest Client',
       action: 'Order Placed',
       ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
       userAgent: req.headers['user-agent'],
       status: 'success',
-      details: `Order #${order.id} — ₹${order.total_amount}`,
+      details: `Order #${order.id} — ₹${order.total_amount} (${order.payment_method || 'cod'})`,
     });
     res.json({ success: true, order });
   } catch (err) {
     next(err);
   }
 };
+
 
 module.exports = {
   getCart,

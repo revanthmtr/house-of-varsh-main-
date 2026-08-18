@@ -23,12 +23,15 @@ const createOrder = async (req, res, next) => {
       return res.status(400).json({ error: 'Cannot create payment order with zero or invalid amount.' });
     }
 
+    const userId = req.user ? req.user.id : null;
+    const userEmail = req.user?.email || '';
+
     const orderData = await paymentService.createRazorpayOrder({
       amount: finalAmount,
-      receipt: `hov_${req.user.id}_${Date.now()}`,
+      receipt: `hov_${userId || 'guest'}_${Date.now()}`,
       notes: {
-        userId: String(req.user.id),
-        userEmail: req.user.email || '',
+        userId: String(userId || 'guest'),
+        userEmail: userEmail,
       },
     });
 
@@ -63,7 +66,7 @@ const verifyPayment = async (req, res, next) => {
 
     if (!isValid) {
       await logAudit({
-        email: req.user?.email || 'Unknown',
+        email: req.user?.email || shipping?.phone || 'Unknown',
         action: 'Payment Signature Tampering Detected',
         ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
         userAgent: req.headers['user-agent'],
@@ -77,21 +80,24 @@ const verifyPayment = async (req, res, next) => {
       });
     }
 
+    const userId = req.user ? req.user.id : null;
+
     // Step 2: Create Confirmed Order in Database
-    const order = await paymentService.createVerifiedOrder(req.user.id, shipping, {
+    const order = await paymentService.createVerifiedOrder(userId, shipping, {
       razorpay_payment_id,
       razorpay_order_id,
     });
 
     // Step 3: Record Audit Log
     await logAudit({
-      email: req.user?.email,
+      email: req.user?.email || shipping?.phone || 'Guest Client',
       action: 'Payment Verified & Order Confirmed',
       ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
       userAgent: req.headers['user-agent'],
       status: 'success',
       details: `Order #${order.id} — Paid ₹${order.total_amount} via Razorpay (${razorpay_payment_id})`,
     });
+
 
     res.json({
       success: true,

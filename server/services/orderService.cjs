@@ -16,8 +16,10 @@ const createOrderFromCart = async (userId, shipping) => {
     throw { status: 400, message: 'Shipping name, phone, and address are required.' };
   }
 
+  const sanitizedUserId = userId ? (parseInt(userId, 10) || null) : null;
+
   const orderId = await withTransaction(async ({ queryAll: txQueryAll, queryRun: txQueryRun }) => {
-    let cartItems = await txQueryAll('SELECT * FROM cart_items WHERE user_id = ?', [userId]);
+    let cartItems = sanitizedUserId ? await txQueryAll('SELECT * FROM cart_items WHERE user_id = ?', [sanitizedUserId]) : [];
     
     // If cart table was empty but items were passed in shipping payload, use payload items
     if (cartItems.length === 0 && Array.isArray(items) && items.length > 0) {
@@ -34,7 +36,7 @@ const createOrderFromCart = async (userId, shipping) => {
       `INSERT INTO orders
         (user_id, status, payment_method, total_amount, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_pincode, notes)
        VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, payment_method || 'cod', totalAmount, name, phone, address, city || null, pincode || null, notes || null]
+      [sanitizedUserId, payment_method || 'cod', totalAmount, name, phone, address, city || null, pincode || null, notes || null]
     );
 
     const newOrderId = orderResult.lastID;
@@ -47,20 +49,24 @@ const createOrderFromCart = async (userId, shipping) => {
       );
     }
 
-    await txQueryRun('DELETE FROM cart_items WHERE user_id = ?', [userId]);
+    if (sanitizedUserId) {
+      await txQueryRun('DELETE FROM cart_items WHERE user_id = ?', [sanitizedUserId]);
+    }
 
     return newOrderId;
   });
 
-  // Query order AFTER transaction commits so PostgreSQL Read Committed isolation finds the record
-  return await getOrderById(orderId, userId);
+  const order = await queryGet('SELECT * FROM orders WHERE id = ?', [orderId]);
+  const orderItems = await queryAll('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+  return { ...(order || { id: orderId, total_amount: 0 }), items: orderItems || [] };
 };
 
-
 const getOrderById = async (orderId, userId = null) => {
-  const order = userId
-    ? await queryGet('SELECT * FROM orders WHERE id = ? AND user_id = ?', [orderId, userId])
+  const sanitizedUserId = userId ? (parseInt(userId, 10) || null) : null;
+  const order = sanitizedUserId
+    ? await queryGet('SELECT * FROM orders WHERE id = ? AND user_id = ?', [orderId, sanitizedUserId])
     : await queryGet('SELECT * FROM orders WHERE id = ?', [orderId]);
+
 
   if (!order) throw { status: 404, message: 'Order not found.' };
 

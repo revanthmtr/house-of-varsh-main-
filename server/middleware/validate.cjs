@@ -56,13 +56,15 @@ const addToCartSchema = z.object({
 
 const checkoutSchema = z.object({
   name: z.string().min(1, 'Shipping recipient name is required'),
-  phone: z.string().min(5, 'Valid phone number is required'),
-  address: z.string().min(5, 'Shipping address is required'),
+  phone: z.string().min(3, 'Valid phone number is required'),
+  address: z.string().min(3, 'Shipping address is required'),
   city: z.string().optional().nullable(),
   pincode: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  payment_method: z.enum(['cod', 'online', 'razorpay']).default('cod'),
-});
+  payment_method: z.string().optional().default('cod'),
+  items: z.array(z.any()).optional(),
+}).passthrough();
+
 
 const updateOrderStatusSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'], {
