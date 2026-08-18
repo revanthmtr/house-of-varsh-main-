@@ -573,26 +573,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       {isOpen && (
         <motion.div
           className="ap-overlay"
+          data-lenis-prevent
+
           initial={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
           exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
           transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
         >
-          <div className="ap-container">
+          <div className="ap-container" data-lenis-prevent>
             {/* Sidebar */}
-            <div className="ap-sidebar">
+            <div className="ap-sidebar" data-lenis-prevent>
               <div className="ap-sidebar-brand">
-                House of Varsh
-                <span>HQ System Panel</span>
+                <div className="ap-brand-text">
+                  House of Varsh
+                  <span>HQ System Panel</span>
+                </div>
+                <button className="ap-mobile-exit-btn" onClick={onClose} aria-label="Exit Admin Panel">
+                  <LogOut size={14} />
+                  <span>Exit</span>
+                </button>
               </div>
               
-              <nav className="ap-nav">
+              <nav className="ap-nav" data-lenis-prevent>
                 <button className={`ap-nav-item ${activeMenu === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveMenu('dashboard')}>
-                  <LayoutDashboard size={18} /> Dashboard
+                  <LayoutDashboard size={16} /> <span>Dashboard</span>
                 </button>
-                <div className="ap-nav-divider">Managment</div>
+                <div className="ap-nav-divider">Management</div>
                 <button className={`ap-nav-item ${activeMenu === 'orders' ? 'active' : ''}`} onClick={() => setActiveMenu('orders')}>
-                  <ShoppingBag size={18} /> Live Orders
+                  <ShoppingBag size={16} /> <span>Live Orders</span>
                   {pendingOrdersCount > 0 && (
                     <span className="ap-nav-badge" style={{ background: '#ef4444', color: '#FFF' }}>
                       {pendingOrdersCount}
@@ -600,17 +608,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                   )}
                 </button>
                 <button className={`ap-nav-item ${activeMenu === 'customers' ? 'active' : ''}`} onClick={() => setActiveMenu('customers')}>
-                  <UsersIcon size={18} /> Customers
+                  <UsersIcon size={16} /> <span>Customers</span>
                 </button>
                 <button className={`ap-nav-item ${activeMenu === 'products' ? 'active' : ''}`} onClick={() => setActiveMenu('products')}>
-                  <Package size={18} /> Product Catalog
+                  <Package size={16} /> <span>Product Catalog</span>
                 </button>
                 <button className={`ap-nav-item ${activeMenu === 'content' ? 'active' : ''}`} onClick={() => setActiveMenu('content')}>
-                  <FileEdit size={18} /> Site Content Editor
+                  <FileEdit size={16} /> <span>Content CMS</span>
                 </button>
                 <div className="ap-nav-divider">Security</div>
                 <button className={`ap-nav-item ${activeMenu === 'security' ? 'active' : ''}`} onClick={() => setActiveMenu('security')} style={activeMenu === 'security' ? {} : { color: auditLogs.some(l => l.status === 'threat') ? '#ef4444' : undefined }}>
-                  <ShieldAlert size={18} /> Audit Logs
+                  <ShieldAlert size={16} /> <span>Audit Logs</span>
                   {auditLogs.filter(l => l.status === 'threat').length > 0 && (
                     <span className="ap-nav-badge" style={{ background: '#ef4444' }}>
                       {auditLogs.filter(l => l.status === 'threat').length}
@@ -631,8 +639,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
             </div>
 
             {/* Main Content Area */}
-            <div className="ap-main">
+            <div className="ap-main" data-lenis-prevent>
               <div className="ap-header">
+
                 <div className="ap-header-left">
                   <button className="ap-back-btn" onClick={onClose} title="Return to website">
                     <ArrowLeft size={16} />

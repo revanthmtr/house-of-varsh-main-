@@ -653,9 +653,29 @@
     align-items: center;
   }
 
+  .ap-brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
   .ap-sidebar-brand span {
     margin-top: 0;
     font-size: 0.6rem;
+  }
+
+  .ap-mobile-exit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #F87171;
+    padding: 0.35rem 0.75rem;
+    border-radius: 14px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
   }
 
   .ap-nav {
@@ -663,10 +683,14 @@
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
-    gap: 0.45rem !important;
-    padding: 0.2rem 0.1rem 0.4rem !important;
+    overflow-y: hidden !important;
+    gap: 0.5rem !important;
+    padding: 0.35rem 0.2rem 0.5rem !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none;
+    touch-action: pan-x !important;
+    scrollbar-width: none !important;
+    width: 100% !important;
+    max-width: 100vw !important;
   }
 
   .ap-nav::-webkit-scrollbar {
@@ -684,25 +708,27 @@
     display: inline-flex !important;
     align-items: center !important;
     gap: 0.45rem !important;
-    padding: 0.5rem 0.9rem !important;
-    font-size: 0.76rem !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(212, 175, 55, 0.35) !important;
-    background: rgba(30, 3, 12, 0.9) !important;
+    padding: 0.55rem 0.95rem !important;
+    font-size: 0.78rem !important;
+    border-radius: 24px !important;
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+    background: rgba(30, 3, 12, 0.95) !important;
     color: #E8D0A8 !important;
-    min-height: 38px;
+    min-height: 40px !important;
+    touch-action: pan-x pan-y !important;
   }
 
   .ap-nav-item.active {
     background: linear-gradient(135deg, #8B1C33, #5C0015) !important;
     border-color: var(--ap-gold) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.4) !important;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.45) !important;
   }
 
   .ap-sidebar-footer {
     display: none !important;
   }
+
 
   .ap-main {
     flex: 1;
