@@ -2,18 +2,22 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useSiteContent } from '../context/SiteContentContext';
 import { DEFAULT_PRODUCTS, type Product } from '../data/defaultProducts';
 import { resolveMediaUrl } from '../utils/api';
 import './LatestCollection.css';
-
 
 const LatestCollection = () => {
   const [activeTab, setActiveTab] = useState('new');
   const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const { get } = useSiteContent();
+
+  const isAdmin = user?.role === 'admin';
+
 
   useEffect(() => {
     fetch('/api/products')
@@ -115,13 +119,15 @@ const LatestCollection = () => {
                     <div className="product-badge">{product.badge}</div>
                   ) : null}
                   
-                  <button 
-                    className={`wishlist-btn ${wishlist.includes(product.id) ? 'active' : ''}`}
-                    onClick={(e) => toggleWishlist(product.id, e)}
-                    aria-label="Add to wishlist"
-                  >
-                    <Heart size={16} fill={wishlist.includes(product.id) ? 'var(--gold)' : 'none'} strokeWidth={1.5} />
-                  </button>
+                  {!isAdmin && (
+                    <button 
+                      className={`wishlist-btn ${wishlist.includes(product.id) ? 'active' : ''}`}
+                      onClick={(e) => toggleWishlist(product.id, e)}
+                      aria-label="Add to wishlist"
+                    >
+                      <Heart size={16} fill={wishlist.includes(product.id) ? 'var(--gold)' : 'none'} strokeWidth={1.5} />
+                    </button>
+                  )}
 
                   {product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov') ? (
                     <video 
@@ -148,58 +154,62 @@ const LatestCollection = () => {
                     />
                   )}
 
-                  {product.is_sold_out ? (
-                    <div className="quick-add-overlay sold-out-overlay" onClick={(e) => e.stopPropagation()}>
-                      <span>Sold Out</span>
-                    </div>
-                  ) : (
-                    <div
-                      className="quick-add-overlay"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart({ 
-                          product_id: product.id, 
-                          name: product.name, 
-                          price: product.price, 
-                          img: product.img, 
-                          category: product.category 
-                        });
-                      }}
-                    >
-                      <ShoppingBag size={14} />
-                      <span>Quick Add to Bag</span>
-                    </div>
+                  {!isAdmin && (
+                    product.is_sold_out ? (
+                      <div className="quick-add-overlay sold-out-overlay" onClick={(e) => e.stopPropagation()}>
+                        <span>Sold Out</span>
+                      </div>
+                    ) : (
+                      <div
+                        className="quick-add-overlay"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart({ 
+                            product_id: product.id, 
+                            name: product.name, 
+                            price: product.price, 
+                            img: product.img, 
+                            category: product.category 
+                          });
+                        }}
+                      >
+                        <ShoppingBag size={14} />
+                        <span>Quick Add to Bag</span>
+                      </div>
+                    )
                   )}
                 </div>
                 <div className="product-info">
                   <h3 className="product-name">{product.name}</h3>
                   <p className="product-price">{product.price}</p>
                   
-                  <button
-                    type="button"
-                    className={`product-card-add-btn ${product.is_sold_out ? 'product-card-sold-out-btn' : ''}`}
-                    disabled={product.is_sold_out}
-                    onClick={() => {
-                      if (product.is_sold_out) return;
-                      addToCart({
-                        product_id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        img: product.img,
-                        category: product.category,
-                      });
-                    }}
-                    aria-label={product.is_sold_out ? `${product.name} is Sold Out` : `Add ${product.name} to shopping bag`}
-                  >
-                    {product.is_sold_out ? (
-                      <span>Sold Out</span>
-                    ) : (
-                      <>
-                        <ShoppingBag size={13} />
-                        <span>Add to Bag</span>
-                      </>
-                    )}
-                  </button>
+                  {!isAdmin && (
+                    <button
+                      type="button"
+                      className={`product-card-add-btn ${product.is_sold_out ? 'product-card-sold-out-btn' : ''}`}
+                      disabled={product.is_sold_out}
+                      onClick={() => {
+                        if (product.is_sold_out) return;
+                        addToCart({
+                          product_id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          img: product.img,
+                          category: product.category,
+                        });
+                      }}
+                      aria-label={product.is_sold_out ? `${product.name} is Sold Out` : `Add ${product.name} to shopping bag`}
+                    >
+                      {product.is_sold_out ? (
+                        <span>Sold Out</span>
+                      ) : (
+                        <>
+                          <ShoppingBag size={13} />
+                          <span>Add to Bag</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
 
               </motion.div>

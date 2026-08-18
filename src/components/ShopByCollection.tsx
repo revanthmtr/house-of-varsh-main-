@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useSiteContent } from '../context/SiteContentContext';
 import { DEFAULT_PRODUCTS, type Product } from '../data/defaultProducts';
 import { resolveMediaUrl } from '../utils/api';
 import './ShopByCollection.css';
-
 
 const defaultNewArrivals = DEFAULT_PRODUCTS.filter(p => p.category === 'new');
 
@@ -14,7 +14,11 @@ const ShopByCollection = () => {
   const [products, setProducts] = useState<Product[]>(defaultNewArrivals);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const { get } = useSiteContent();
+
+  const isAdmin = user?.role === 'admin';
+
 
   useEffect(() => {
     fetch('/api/products')
@@ -118,18 +122,20 @@ const ShopByCollection = () => {
                   </span>
                 ) : null}
                 
-                <button
-                  onClick={(e) => toggleWishlist(product.id, e)}
-                  aria-label="Wishlist"
-                  className="wishlist-btn"
-                >
-                  <Heart
-                    size={15}
-                    fill={wishlist.includes(product.id) ? 'var(--gold)' : 'none'}
-                    stroke={wishlist.includes(product.id) ? 'var(--gold)' : 'currentColor'}
-                    strokeWidth={1.5}
-                  />
-                </button>
+                {!isAdmin && (
+                  <button
+                    onClick={(e) => toggleWishlist(product.id, e)}
+                    aria-label="Wishlist"
+                    className="wishlist-btn"
+                  >
+                    <Heart
+                      size={15}
+                      fill={wishlist.includes(product.id) ? 'var(--gold)' : 'none'}
+                      stroke={wishlist.includes(product.id) ? 'var(--gold)' : 'currentColor'}
+                      strokeWidth={1.5}
+                    />
+                  </button>
+                )}
               </div>
 
               <div className="product-details">
@@ -142,32 +148,35 @@ const ShopByCollection = () => {
                   <meta itemProp="availability" content={product.is_sold_out ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'} />
                 </p>
 
-                <button
-                  type="button"
-                  className={`product-card-add-btn ${product.is_sold_out ? 'product-card-sold-out-btn' : ''}`}
-                  disabled={product.is_sold_out}
-                  onClick={() => {
-                    if (product.is_sold_out) return;
-                    addToCart({
-                      product_id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      img: product.img,
-                      category: product.category,
-                    });
-                  }}
-                  aria-label={product.is_sold_out ? `${product.name} is Sold Out` : `Add ${product.name} to shopping bag`}
-                >
-                  {product.is_sold_out ? (
-                    <span>Sold Out</span>
-                  ) : (
-                    <>
-                      <ShoppingBag size={13} />
-                      <span>Add to Bag</span>
-                    </>
-                  )}
-                </button>
+                {!isAdmin && (
+                  <button
+                    type="button"
+                    className={`product-card-add-btn ${product.is_sold_out ? 'product-card-sold-out-btn' : ''}`}
+                    disabled={product.is_sold_out}
+                    onClick={() => {
+                      if (product.is_sold_out) return;
+                      addToCart({
+                        product_id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        img: product.img,
+                        category: product.category,
+                      });
+                    }}
+                    aria-label={product.is_sold_out ? `${product.name} is Sold Out` : `Add ${product.name} to shopping bag`}
+                  >
+                    {product.is_sold_out ? (
+                      <span>Sold Out</span>
+                    ) : (
+                      <>
+                        <ShoppingBag size={13} />
+                        <span>Add to Bag</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
+
 
             </motion.article>
 

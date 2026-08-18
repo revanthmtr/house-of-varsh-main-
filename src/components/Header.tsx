@@ -173,23 +173,26 @@ const Header = () => {
           </button>
         )}
 
-        {/* Cart */}
-        <div style={{ position: 'relative' }}>
-          <ShoppingBag className="header-icon" size={20} onClick={() => setIsCartOpen(true)} />
-          {cart.length > 0 && (
-            <span style={{
-              position: 'absolute', top: -5, right: -5,
-              background: 'var(--accent)', color: '#fff',
-              fontSize: '10px', width: '15px', height: '15px',
-              borderRadius: '50%', display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              pointerEvents: 'none'
-            }}>
-              {cart.length}
-            </span>
-          )}
-        </div>
+        {/* Cart — Customers & Guests Only */}
+        {user?.role !== 'admin' && (
+          <div style={{ position: 'relative' }}>
+            <ShoppingBag className="header-icon" size={20} onClick={() => setIsCartOpen(true)} aria-label="Shopping Bag" />
+            {cart.length > 0 && (
+              <span style={{
+                position: 'absolute', top: -5, right: -5,
+                background: 'var(--accent)', color: '#fff',
+                fontSize: '10px', width: '15px', height: '15px',
+                borderRadius: '50%', display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                pointerEvents: 'none'
+              }}>
+                {cart.length}
+              </span>
+            )}
+          </div>
+        )}
       </div>
+
 
       {/* ── Slide-out Mobile Navigation Drawer ── */}
       <div className={`mobile-nav-drawer ${mobileNavOpen ? 'open' : ''}`}>
