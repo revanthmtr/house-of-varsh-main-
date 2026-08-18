@@ -7,14 +7,10 @@ const parsePrice = (priceStr) => {
   return isNaN(n) ? 0 : n;
 };
 
-// Initialize Razorpay instance lazily or safely
+// Initialize Razorpay instance lazily or safely with test defaults
 const getRazorpayInstance = () => {
-  const key_id = process.env.RAZORPAY_KEY_ID;
-  const key_secret = process.env.RAZORPAY_KEY_SECRET;
-
-  if (!key_id || !key_secret) {
-    throw { status: 500, message: 'Razorpay API credentials are not configured on the server.' };
-  }
+  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRB4I5DXNkWEeW';
+  const key_secret = process.env.RAZORPAY_KEY_SECRET || 'IgZjRgxOtTIkiHT5VefAXS61';
 
   return new Razorpay({
     key_id,
@@ -41,11 +37,13 @@ const createRazorpayOrder = async ({ amount, receipt, notes = {} }) => {
   };
 
   const order = await razorpay.orders.create(options);
+  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRB4I5DXNkWEeW';
+
   return {
     orderId: order.id,
     amount: order.amount,
     currency: order.currency,
-    keyId: process.env.RAZORPAY_KEY_ID,
+    keyId: key_id,
   };
 };
 
@@ -54,10 +52,8 @@ const createRazorpayOrder = async ({ amount, receipt, notes = {} }) => {
  * generated using HMAC SHA256 of order_id + "|" + payment_id
  */
 const verifyPaymentSignature = ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) => {
-  const secret = process.env.RAZORPAY_KEY_SECRET;
-  if (!secret) {
-    throw { status: 500, message: 'Razorpay Secret Key is missing on the server.' };
-  }
+  const secret = process.env.RAZORPAY_KEY_SECRET || 'IgZjRgxOtTIkiHT5VefAXS61';
+
 
   const body = razorpay_order_id + '|' + razorpay_payment_id;
   const expectedSignature = crypto
