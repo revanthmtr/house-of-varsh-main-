@@ -4,11 +4,11 @@
  */
 require('dotenv').config();
 
-// ── Built-in Payment Gateway Defaults ──────────────────────────────────────────
-// These allow the backend to work on Render/production with zero env var config.
-// To use live keys: set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Render dashboard.
-if (!process.env.RAZORPAY_KEY_ID)     process.env.RAZORPAY_KEY_ID     = 'rzp_test_TRB4I5DXNkWEeW';
-if (!process.env.RAZORPAY_KEY_SECRET) process.env.RAZORPAY_KEY_SECRET = 'IgZjRgxOtTIkiHT5VefAXS61';
+// ── Built-in Payment Gateway Defaults (LIVE PRODUCTION) ────────────────────────
+// These allow the backend to work on Render/production seamlessly.
+if (!process.env.RAZORPAY_KEY_ID)     process.env.RAZORPAY_KEY_ID     = 'rzp_live_TRD6mlUZHguUAm';
+if (!process.env.RAZORPAY_KEY_SECRET) process.env.RAZORPAY_KEY_SECRET = 'Oh6FXaAJdnOHNQhE4yNJAxEa';
+
 
 const app = require('./server/server.cjs');
 

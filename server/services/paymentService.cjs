@@ -7,10 +7,10 @@ const parsePrice = (priceStr) => {
   return isNaN(n) ? 0 : n;
 };
 
-// Initialize Razorpay instance lazily or safely with test defaults
+// Initialize Razorpay instance lazily or safely with live defaults
 const getRazorpayInstance = () => {
-  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRB4I5DXNkWEeW';
-  const key_secret = process.env.RAZORPAY_KEY_SECRET || 'IgZjRgxOtTIkiHT5VefAXS61';
+  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_live_TRD6mlUZHguUAm';
+  const key_secret = process.env.RAZORPAY_KEY_SECRET || 'Oh6FXaAJdnOHNQhE4yNJAxEa';
 
   return new Razorpay({
     key_id,
@@ -37,7 +37,7 @@ const createRazorpayOrder = async ({ amount, receipt, notes = {} }) => {
   };
 
   const order = await razorpay.orders.create(options);
-  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRB4I5DXNkWEeW';
+  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_live_TRD6mlUZHguUAm';
 
   return {
     orderId: order.id,
@@ -52,7 +52,8 @@ const createRazorpayOrder = async ({ amount, receipt, notes = {} }) => {
  * generated using HMAC SHA256 of order_id + "|" + payment_id
  */
 const verifyPaymentSignature = ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) => {
-  const secret = process.env.RAZORPAY_KEY_SECRET || 'IgZjRgxOtTIkiHT5VefAXS61';
+  const secret = process.env.RAZORPAY_KEY_SECRET || 'Oh6FXaAJdnOHNQhE4yNJAxEa';
+
 
 
   const body = razorpay_order_id + '|' + razorpay_payment_id;
