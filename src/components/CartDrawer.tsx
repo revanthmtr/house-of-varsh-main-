@@ -20,6 +20,9 @@ const CartDrawer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
 
+  const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod'>('razorpay');
+  const [isRazorpayPaid, setIsRazorpayPaid] = useState(false);
+
   // Keep name in sync with user login state
   useEffect(() => {
     if (user?.name && !form.name) {
@@ -38,6 +41,18 @@ const CartDrawer: React.FC = () => {
     }
   }, [isCartOpen]);
 
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const closeAndReset = () => {
     setIsCartOpen(false);
     // Wait for the close animation before resetting internal state
@@ -46,6 +61,8 @@ const CartDrawer: React.FC = () => {
       setError('');
       setForm({ name: user?.name || '', phone: '', address: '', city: '', pincode: '', notes: '' });
       setOrderId(null);
+      setIsRazorpayPaid(false);
+      setPaymentMethod('razorpay');
     }, 350);
   };
 
@@ -53,20 +70,129 @@ const CartDrawer: React.FC = () => {
     e.preventDefault();
     setError('');
     if (!form.name.trim() || !form.phone.trim() || !form.address.trim()) {
-      setError('Name, phone, and delivery address are required.');
+      setError('Name, phone number, and delivery address are required.');
       return;
     }
+
+    const token = localStorage.getItem('hov_token');
+    if (!token) {
+      setError('Please sign in or create an account to place your order.');
+      return;
+    }
+
     setLoading(true);
-    const result = await checkout(form);
+
+    // ── Razorpay Online Payment Flow ──
+    if (paymentMethod === 'razorpay') {
+      try {
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          throw new Error('Unable to load Razorpay payment gateway. Please check your internet connection.');
+        }
+
+        // 1. Create Razorpay order on backend
+        const orderRes = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            amount: cartTotal,
+            items: cart,
+          }),
+        });
+
+        const orderData = await orderRes.json();
+        if (!orderRes.ok) {
+          throw new Error(orderData.error || 'Failed to initiate Razorpay transaction.');
+        }
+
+        // 2. Open Razorpay Checkout Modal
+        const options = {
+          key: orderData.keyId,
+          amount: orderData.amount,
+          currency: orderData.currency || 'INR',
+          name: 'House of Varsh',
+          description: 'Luxury Couture Private Order',
+          image: '/chinni_logo.png',
+          order_id: orderData.orderId,
+          prefill: {
+            name: form.name,
+            contact: form.phone,
+            email: user?.email || '',
+          },
+          theme: {
+            color: '#2A0108',
+          },
+          modal: {
+            ondismiss: () => {
+              setLoading(false);
+            },
+          },
+          handler: async (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              // 3. Verify Payment Signature & Create Confirmed Order on Backend
+              const verifyRes = await fetch('/api/payment/verify', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                  shipping: form,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              if (!verifyRes.ok) {
+                throw new Error(verifyData.error || 'Payment signature could not be verified.');
+              }
+
+              setIsRazorpayPaid(true);
+              setOrderId(verifyData.order?.id ?? null);
+              setStep('confirmed');
+            } catch (err: any) {
+              console.error(err);
+              setError(err.message || 'Payment verification failed.');
+            } finally {
+              setLoading(false);
+            }
+          },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', (response: any) => {
+          setLoading(false);
+          setError(`Payment Failed: ${response.error?.description || 'Transaction declined.'}`);
+        });
+        rzp.open();
+      } catch (err: any) {
+        setLoading(false);
+        console.error(err);
+        setError(err.message || 'Payment initiation failed. Please try again.');
+      }
+      return;
+    }
+
+    // ── Cash on Delivery (COD) Flow ──
+    const result = await checkout({ ...form, notes: form.notes ? `${form.notes} (Payment: Cash on Delivery)` : 'Payment: Cash on Delivery' });
     setLoading(false);
     if (result.success) {
+      setIsRazorpayPaid(false);
       setOrderId(result.orderId ?? null);
       setStep('confirmed');
     } else {
       setError(result.error || 'Something went wrong. Please try again.');
     }
   };
-
 
   return (
     <AnimatePresence>
@@ -98,7 +224,7 @@ const CartDrawer: React.FC = () => {
                 <img src="/chinni_logo.png" alt="House of Varsh" style={{ height: '28px' }} />
                 <h2 className="cart-title">
                   {step === 'bag' && 'Private Client Bag'}
-                  {step === 'shipping' && 'Shipping Details'}
+                  {step === 'shipping' && 'Checkout & Payment'}
                   {step === 'confirmed' && 'Order Confirmed'}
                 </h2>
               </div>
@@ -163,7 +289,7 @@ const CartDrawer: React.FC = () => {
             )}
 
 
-            {/* Step 2: Shipping form */}
+            {/* Step 2: Shipping form & Payment Selection */}
             {step === 'shipping' && (
               <form
                 className="cart-form-wrapper"
@@ -241,19 +367,53 @@ const CartDrawer: React.FC = () => {
                     </div>
                   </div>
 
-
                   <label className="cart-form-label">Order Notes (optional)</label>
                   <textarea
                     className="cart-form-input cart-form-textarea"
                     value={form.notes}
                     onChange={e => setForm({ ...form, notes: e.target.value })}
-                    placeholder="Any special instructions"
+                    placeholder="Special tailoring or delivery requests"
                     disabled={loading}
                     rows={2}
                   />
 
-                  <div className="cart-payment-note">
-                    Payment: <strong>Cash on Delivery</strong> &mdash; pay when your order arrives.
+                  {/* ── Payment Method Selector ── */}
+                  <label className="cart-form-label" style={{ marginTop: '0.5rem' }}>Payment Method *</label>
+                  <div className="cart-payment-options">
+                    <label className={`cart-payment-option ${paymentMethod === 'razorpay' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value="razorpay"
+                        checked={paymentMethod === 'razorpay'}
+                        onChange={() => setPaymentMethod('razorpay')}
+                        disabled={loading}
+                      />
+                      <div className="cart-payment-option-content">
+                        <div className="cart-payment-option-title">
+                          <span>💳 Razorpay Secure Online Payment</span>
+                          <span className="cart-payment-tag">INSTANT</span>
+                        </div>
+                        <span className="cart-payment-option-desc">UPI (GPay / PhonePe / Paytm), Credit / Debit Cards, NetBanking, EMI</span>
+                      </div>
+                    </label>
+
+                    <label className={`cart-payment-option ${paymentMethod === 'cod' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value="cod"
+                        checked={paymentMethod === 'cod'}
+                        onChange={() => setPaymentMethod('cod')}
+                        disabled={loading}
+                      />
+                      <div className="cart-payment-option-content">
+                        <div className="cart-payment-option-title">
+                          <span>📦 Cash on Delivery (COD)</span>
+                        </div>
+                        <span className="cart-payment-option-desc">Pay in cash or UPI when your masterpiece arrives at your doorstep.</span>
+                      </div>
+                    </label>
                   </div>
                 </div>
 
@@ -264,7 +424,9 @@ const CartDrawer: React.FC = () => {
                     <span>&#8377;{cartTotal.toLocaleString('en-IN')}</span>
                   </div>
                   <button className="cart-checkout-btn" type="submit" disabled={loading}>
-                    {loading ? 'Placing Order…' : 'Place Order'}
+                    {loading
+                      ? (paymentMethod === 'razorpay' ? 'Opening Payment Gateway…' : 'Placing Order…')
+                      : (paymentMethod === 'razorpay' ? `Pay ₹${cartTotal.toLocaleString('en-IN')} via Razorpay` : 'Place Order (Cash on Delivery)')}
                   </button>
                 </div>
               </form>
@@ -276,8 +438,13 @@ const CartDrawer: React.FC = () => {
                 <CheckCircle2 size={56} className="cart-confirm-icon" />
                 <h3>Thank you!</h3>
                 <p>
-                  Your order{orderId ? ` #${orderId}` : ''} has been placed successfully.
-                  We'll contact you shortly to confirm delivery details.
+                  Your order{orderId ? ` #${orderId}` : ''} has been {isRazorpayPaid ? 'paid and confirmed' : 'placed'} successfully.
+                  {isRazorpayPaid && (
+                    <span style={{ display: 'block', marginTop: '0.5rem', color: '#2e7d32', fontWeight: 600 }}>
+                      ✓ Payment Verified via Razorpay
+                    </span>
+                  )}
+                  We'll contact you shortly to coordinate your private delivery.
                 </p>
                 <button className="cart-checkout-btn" onClick={closeAndReset}>
                   Continue Shopping
@@ -292,4 +459,5 @@ const CartDrawer: React.FC = () => {
 };
 
 export default CartDrawer;
+
 

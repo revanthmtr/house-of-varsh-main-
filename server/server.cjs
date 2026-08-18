@@ -18,8 +18,10 @@ const cartRoutes = require('./routes/cartRoutes.cjs');
 const orderRoutes = require('./routes/orderRoutes.cjs');
 const contentRoutes = require('./routes/contentRoutes.cjs');
 const adminRoutes = require('./routes/adminRoutes.cjs');
+const paymentRoutes = require('./routes/paymentRoutes.cjs');
 
 const app = express();
+
 const PORT = process.env.PORT || 5001;
 
 // ── Cloudinary Configuration ────────────────────────────────────────────────
@@ -160,8 +162,10 @@ app.use('/api', cartRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', contentRoutes);
 app.use('/api', adminRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────────────────
+
 app.get('/api/health', async (_req, res) => {
   let dbStatus = 'healthy';
   let dbType = process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite';

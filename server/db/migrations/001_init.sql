@@ -49,9 +49,11 @@ CREATE TABLE IF NOT EXISTS orders (
     shipping_city VARCHAR(100),
     shipping_pincode VARCHAR(20),
     notes TEXT,
+    payment_id VARCHAR(255),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE IF NOT EXISTS order_items (
     id SERIAL PRIMARY KEY,
