@@ -10,9 +10,7 @@ type Step = 'bag' | 'shipping' | 'confirmed';
 
 const CartDrawer: React.FC = () => {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, checkout, cartTotal } = useCart();
-  const { user } = useAuth();
-
-
+  const { user, token } = useAuth();
 
   const [step, setStep] = useState<Step>('bag');
   const [form, setForm] = useState({ name: user?.name || '', phone: '', address: '', city: '', pincode: '', notes: '' });
@@ -74,13 +72,14 @@ const CartDrawer: React.FC = () => {
       return;
     }
 
-    const token = localStorage.getItem('hov_token');
-    if (!token) {
+    const activeToken = token || localStorage.getItem('hov_token') || localStorage.getItem('chinni_token');
+    if (!activeToken) {
       setError('Please sign in or create an account to place your order.');
       return;
     }
 
     setLoading(true);
+
 
     // ── Razorpay Online Payment Flow ──
     if (paymentMethod === 'razorpay') {
@@ -95,7 +94,7 @@ const CartDrawer: React.FC = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${activeToken}`,
           },
           body: JSON.stringify({
             amount: cartTotal,
@@ -141,7 +140,7 @@ const CartDrawer: React.FC = () => {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`,
+                  Authorization: `Bearer ${activeToken}`,
                 },
                 body: JSON.stringify({
                   razorpay_payment_id: response.razorpay_payment_id,
@@ -150,6 +149,7 @@ const CartDrawer: React.FC = () => {
                   shipping: form,
                 }),
               });
+
 
 
               const verifyData = await verifyRes.json();
