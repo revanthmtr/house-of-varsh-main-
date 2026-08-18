@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { resolveMediaUrl } from '../utils/api';
 import './CartDrawer.css';
 
@@ -9,12 +10,22 @@ type Step = 'bag' | 'shipping' | 'confirmed';
 
 const CartDrawer: React.FC = () => {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, checkout, cartTotal } = useCart();
+  const { user } = useAuth();
+
+
 
   const [step, setStep] = useState<Step>('bag');
-  const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', pincode: '', notes: '' });
+  const [form, setForm] = useState({ name: user?.name || '', phone: '', address: '', city: '', pincode: '', notes: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+
+  // Keep name in sync with user login state
+  useEffect(() => {
+    if (user?.name && !form.name) {
+      setForm(prev => ({ ...prev, name: user.name }));
+    }
+  }, [user]);
 
   // Lock background scroll when cart drawer is open
   useEffect(() => {
@@ -33,7 +44,7 @@ const CartDrawer: React.FC = () => {
     setTimeout(() => {
       setStep('bag');
       setError('');
-      setForm({ name: '', phone: '', address: '', city: '', pincode: '', notes: '' });
+      setForm({ name: user?.name || '', phone: '', address: '', city: '', pincode: '', notes: '' });
       setOrderId(null);
     }, 350);
   };
@@ -42,7 +53,7 @@ const CartDrawer: React.FC = () => {
     e.preventDefault();
     setError('');
     if (!form.name.trim() || !form.phone.trim() || !form.address.trim()) {
-      setError('Name, phone, and address are required.');
+      setError('Name, phone, and delivery address are required.');
       return;
     }
     setLoading(true);
@@ -55,6 +66,7 @@ const CartDrawer: React.FC = () => {
       setError(result.error || 'Something went wrong. Please try again.');
     }
   };
+
 
   return (
     <AnimatePresence>
@@ -171,6 +183,7 @@ const CartDrawer: React.FC = () => {
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
                     placeholder="Your full name"
+                    autoComplete="name"
                     disabled={loading}
                     required
                   />
@@ -178,6 +191,9 @@ const CartDrawer: React.FC = () => {
                   <label className="cart-form-label">Phone Number *</label>
                   <input
                     className="cart-form-input"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={form.phone}
                     onChange={e => setForm({ ...form, phone: e.target.value })}
                     placeholder="10-digit mobile number"
@@ -190,7 +206,8 @@ const CartDrawer: React.FC = () => {
                     className="cart-form-input cart-form-textarea"
                     value={form.address}
                     onChange={e => setForm({ ...form, address: e.target.value })}
-                    placeholder="House no., street, area"
+                    placeholder="House / Flat no., building, street, landmark"
+                    autoComplete="street-address"
                     disabled={loading}
                     rows={3}
                     required
@@ -204,6 +221,7 @@ const CartDrawer: React.FC = () => {
                         value={form.city}
                         onChange={e => setForm({ ...form, city: e.target.value })}
                         placeholder="City"
+                        autoComplete="address-level2"
                         disabled={loading}
                       />
                     </div>
@@ -211,13 +229,18 @@ const CartDrawer: React.FC = () => {
                       <label className="cart-form-label">Pincode</label>
                       <input
                         className="cart-form-input"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        autoComplete="postal-code"
                         value={form.pincode}
                         onChange={e => setForm({ ...form, pincode: e.target.value })}
-                        placeholder="Pincode"
+                        placeholder="6-digit pincode"
                         disabled={loading}
                       />
                     </div>
                   </div>
+
 
                   <label className="cart-form-label">Order Notes (optional)</label>
                   <textarea
