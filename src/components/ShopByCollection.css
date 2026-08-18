@@ -245,44 +245,41 @@
   margin-bottom: 0;
 }
 
+.product-card-add-btn {
+  display: none;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 0.65rem;
+  background: linear-gradient(135deg, #8B1C33 0%, #5C0015 100%);
+  color: #ffffff;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  box-shadow: 0 4px 14px rgba(139, 28, 51, 0.25);
+  transition: all 0.2s ease;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.product-card-add-btn:active {
+  background: #1A0A10;
+  transform: scale(0.97);
+}
+
 /* Responsive Breakpoints & Touch Devices */
 @media (max-width: 1024px), (hover: none), (pointer: coarse) {
   .shop-collection {
     padding: 5rem 0;
   }
 
-  .quick-add-container {
-    position: relative;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    transform: none !important;
-    opacity: 1 !important;
-    margin-top: 0.6rem;
-    padding: 0;
-    pointer-events: auto !important;
-  }
-
-  .product-image-wrapper:hover .quick-add-container {
-    transform: none;
-  }
-
-  .quick-add-btn {
-    width: 100%;
-    min-height: 44px;
-    padding: 0.75rem 1rem;
-    background: var(--wine);
-    color: #FFFFFF;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .quick-add-btn:active {
-    background: #0A0103;
+  .product-card-add-btn {
+    display: flex !important;
   }
 }
 
@@ -302,11 +299,11 @@
   }
 
   .shop-collection-container {
-    padding: 0 1rem;
+    padding: 0 0.85rem;
   }
   
   .shop-collection-title {
-    font-size: 2rem;
+    font-size: 1.85rem;
   }
 
   .product-card-title {
@@ -316,5 +313,10 @@
   .product-card-price {
     font-size: 0.85rem;
   }
+
+  .product-details {
+    margin-top: 0.75rem;
+  }
 }
+
 

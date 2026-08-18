@@ -625,6 +625,7 @@
 }
 
 /* ── Responsive Overhaul for Mobile & Tablet ────────────────────── */
+/* ── Responsive Overhaul for Mobile & Tablet ────────────────────── */
 @media (max-width: 900px) {
   .ap-container {
     flex-direction: column;
@@ -635,27 +636,36 @@
   .ap-sidebar {
     width: 100%;
     height: auto;
-    padding: 0.85rem 1rem 0.5rem;
+    padding: 0.85rem 1rem 0.6rem;
     border-right: none;
     border-bottom: 1px solid var(--ap-gold-border);
     flex-shrink: 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    background: #150208;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   }
 
   .ap-sidebar-brand {
     font-size: 1.25rem;
     margin-bottom: 0.6rem;
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
 
+  .ap-sidebar-brand span {
+    margin-top: 0;
+    font-size: 0.6rem;
+  }
+
   .ap-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 0.4rem;
-    padding-bottom: 0.35rem;
-    -webkit-overflow-scrolling: touch;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 0.45rem !important;
+    padding: 0.2rem 0.1rem 0.4rem !important;
+    -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none;
   }
 
@@ -664,20 +674,34 @@
   }
 
   .ap-nav-divider {
-    display: none;
+    display: none !important;
   }
 
   .ap-nav-item {
-    white-space: nowrap;
-    padding: 0.5rem 0.85rem;
-    font-size: 0.76rem;
-    border-radius: 20px;
-    flex-shrink: 0;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+    padding: 0.5rem 0.9rem !important;
+    font-size: 0.76rem !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(212, 175, 55, 0.35) !important;
+    background: rgba(30, 3, 12, 0.9) !important;
+    color: #E8D0A8 !important;
     min-height: 38px;
   }
 
+  .ap-nav-item.active {
+    background: linear-gradient(135deg, #8B1C33, #5C0015) !important;
+    border-color: var(--ap-gold) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.4) !important;
+  }
+
   .ap-sidebar-footer {
-    display: none;
+    display: none !important;
   }
 
   .ap-main {
@@ -690,17 +714,28 @@
   }
 
   .ap-header {
-    padding: 0 1rem;
-    height: 55px;
+    padding: 0.65rem 1rem;
+    height: auto;
+    min-height: 52px;
     flex-shrink: 0;
   }
 
-  .ap-header-title {
-    font-size: 1.05rem;
+  .ap-header-left {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .ap-header h2 {
+    font-size: 1rem;
+    margin: 0;
   }
 
   .ap-viewport {
-    padding: 1rem;
+    padding: 0.85rem;
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -713,13 +748,30 @@
   }
 
   .ap-metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.85rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .ap-metric-card,
+  .ap-stat-card {
+    padding: 1rem 0.85rem !important;
+  }
+
+  .ap-metric-card h2,
+  .ap-stat-value {
+    font-size: 1.45rem !important;
+    margin: 0.35rem 0 !important;
+  }
+
+  .ap-metric-card span,
+  .ap-stat-label {
+    font-size: 0.65rem !important;
+    letter-spacing: 0.1em !important;
   }
 
   .ap-security-summary {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.85rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
   }
 
   .ap-table-wrapper,
@@ -737,14 +789,6 @@
 }
 
 @media (max-width: 600px) {
-  .ap-metrics-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .ap-security-summary {
-    grid-template-columns: 1fr;
-  }
-
   .ap-grid-2 {
     grid-template-columns: 1fr;
     gap: 0.75rem;
@@ -783,7 +827,7 @@
   }
 
   .ap-card-body {
-    padding: 1.2rem;
+    padding: 1rem;
   }
 
   .ap-orders-filter-bar {
@@ -796,4 +840,5 @@
     padding: 0.4rem 0.75rem;
   }
 }
+
 

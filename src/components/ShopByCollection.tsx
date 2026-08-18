@@ -86,13 +86,14 @@ const ShopByCollection = () => {
                 {product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov') ? (
                   <video
                     src={resolveMediaUrl(product.img)}
+                    poster="/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg"
                     autoPlay
                     loop
                     muted
                     playsInline
-                    preload="metadata"
+                    preload="auto"
                     className="product-image"
-                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                    style={{ objectFit: 'cover', width: '100%', height: '100%', display: 'block', backgroundColor: '#2A0108' }}
                   />
                 ) : (
                   <img
@@ -126,24 +127,6 @@ const ShopByCollection = () => {
                     strokeWidth={1.5}
                   />
                 </button>
-
-                <div className="quick-add-container">
-                  <button
-                    onClick={() =>
-                      addToCart({
-                        product_id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        img: product.img,
-                        category: product.category,
-                      })
-                    }
-                    className="quick-add-btn"
-                  >
-                    <ShoppingBag size={13} />
-                    Quick Add
-                  </button>
-                </div>
               </div>
 
               <div className="product-details">
@@ -155,8 +138,27 @@ const ShopByCollection = () => {
                   <span itemProp="price">{product.price}</span>
                   <meta itemProp="availability" content="https://schema.org/InStock" />
                 </p>
+
+                <button
+                  type="button"
+                  className="product-card-add-btn"
+                  onClick={() =>
+                    addToCart({
+                      product_id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      img: product.img,
+                      category: product.category,
+                    })
+                  }
+                  aria-label={`Add ${product.name} to shopping bag`}
+                >
+                  <ShoppingBag size={13} />
+                  <span>Add to Bag</span>
+                </button>
               </div>
             </motion.article>
+
           ))}
         </div>
       </div>

@@ -122,13 +122,14 @@ const LatestCollection = () => {
                   {product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov') ? (
                     <video 
                       src={resolveMediaUrl(product.img)} 
+                      poster="/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg"
                       className="product-image" 
                       autoPlay 
                       loop 
                       muted 
                       playsInline 
-                      preload="metadata"
-                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                      preload="auto"
+                      style={{ objectFit: 'cover', width: '100%', height: '100%', display: 'block', backgroundColor: '#2A0108' }}
                     />
                   ) : (
                     <img 
@@ -143,7 +144,6 @@ const LatestCollection = () => {
                     />
                   )}
 
-                  
                   <div
                     className="quick-add-overlay"
                     onClick={(e) => {
@@ -164,10 +164,29 @@ const LatestCollection = () => {
                 <div className="product-info">
                   <h3 className="product-name">{product.name}</h3>
                   <p className="product-price">{product.price}</p>
+                  
+                  <button
+                    type="button"
+                    className="product-card-add-btn"
+                    onClick={() =>
+                      addToCart({
+                        product_id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        img: product.img,
+                        category: product.category,
+                      })
+                    }
+                    aria-label={`Add ${product.name} to shopping bag`}
+                  >
+                    <ShoppingBag size={13} />
+                    <span>Add to Bag</span>
+                  </button>
                 </div>
               </motion.div>
             ))}
           </div>
+
 
           <div className="collection-info-box" key={activeTab}>
             <p className="collection-description">

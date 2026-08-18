@@ -17,13 +17,13 @@ const Hero = () => {
 
   const slides = [
     { 
-      image: get('hero', 'slide_1_image', '/house_of_varsh-2026-08-12/683650085_18070177769422704_4642689253014659001_n.jpg'), 
+      image: get('hero', 'slide_1_image', '/house_of_varsh-2026-08-12/687657173_18071142494422704_1421778732749517278_n.jpg'), 
       subtitle: get('hero', 'slide_1_subtitle', 'Handcrafted Luxury Couture'),   
       title: get('hero', 'slide_1_title', 'The Divine Collection'),
       alt: 'House of Varsh premium handcrafted silk saree from The Divine Collection'
     },
     { 
-      image: get('hero', 'slide_2_image', '/house_of_varsh-2026-08-12/687657173_18071142494422704_1421778732749517278_n.jpg'),                                                                                  
+      image: get('hero', 'slide_2_image', '/house_of_varsh-2026-08-12/688713427_18071142515422704_1852034660631262620_n.jpg'),                                                                                  
       subtitle: get('hero', 'slide_2_subtitle', 'Artisan Gold Embroidery'),     
       title: get('hero', 'slide_2_title', 'Golden Embroidery'),
       alt: 'House of Varsh designer lehenga with intricate golden zari embroidery'
