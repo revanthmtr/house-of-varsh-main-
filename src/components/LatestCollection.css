@@ -765,7 +765,7 @@
 @media (max-width: 991px) {
   .collection-layout {
     flex-direction: column-reverse;
-    gap: 3rem;
+    gap: 2.5rem;
   }
   
   .collection-info-box {
@@ -775,13 +775,56 @@
   }
 }
 
+/* Touchscreens & Mobile Devices — Persistent Visible Add to Bag */
+@media (max-width: 900px), (hover: none), (pointer: coarse) {
+  .quick-add-overlay {
+    transform: translateY(0) !important;
+    background: linear-gradient(to top, rgba(26, 10, 16, 0.98) 0%, rgba(26, 10, 16, 0.85) 100%) !important;
+    padding: 0.9rem 1rem !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.12em !important;
+    border-top: 1px solid rgba(212, 175, 55, 0.3) !important;
+    min-height: 44px !important;
+  }
+
+  .quick-add-overlay:active {
+    background: var(--wine) !important;
+    color: #FFFFFF !important;
+  }
+}
+
 @media (max-width: 768px) {
+  .latest-collection {
+    padding: 4.5rem 0;
+  }
+  .latest-collection .section-header {
+    margin-bottom: 2.5rem;
+  }
+  .tabs {
+    gap: 0.6rem 0.8rem;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 0.4rem 1rem 0.8rem;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tab {
+    font-size: 0.72rem;
+    padding: 0.45rem 0.9rem;
+    flex-shrink: 0;
+  }
   .product-grid {
-    gap: 1.5rem;
+    gap: 1.2rem;
     padding-bottom: 1.2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
   .product-card {
-    flex: 0 0 250px;
+    flex: 0 0 230px;
   }
 }
 
@@ -791,9 +834,16 @@
     display: none;
   }
   .collection-info-box {
-    padding: 3rem 1.8rem;
+    padding: 2rem 1.2rem;
+  }
+  .product-card {
+    flex: 0 0 200px;
+  }
+  .product-name {
+    font-size: 1.02rem;
   }
 }
+
 
 /* Special Chumbak-meets-Luxury Painting Card */
 .painting-model-card {

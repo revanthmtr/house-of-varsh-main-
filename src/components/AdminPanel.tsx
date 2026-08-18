@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Image as ImageIcon, LayoutDashboard, Package, FileEdit, ShoppingBag, Users as UsersIcon, LogOut, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSiteContent } from '../context/SiteContentContext';
-import { resolveMediaUrl } from '../utils/api';
+import { resolveMediaUrl, resolveApiUrl } from '../utils/api';
+
 import './AdminPanel.css';
 
 
@@ -264,7 +265,7 @@ const SiteContentEditor: React.FC = () => {
     formData.append('image', file);
 
     try {
-      const res = await fetch('/api/upload', {
+      const res = await fetch(resolveApiUrl('/api/upload'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -301,11 +302,12 @@ const SiteContentEditor: React.FC = () => {
 
     try {
       // ONE request for the entire section
-      const res = await fetch(`/api/content/${section}/bulk`, {
+      const res = await fetch(resolveApiUrl(`/api/content/${section}/bulk`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ fields: changedFields }),
       });
+
 
       if (!res.ok) throw new Error('Save failed');
 
@@ -442,7 +444,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     const fd = new FormData();
     fd.append('image', file);
     try {
-      const res = await fetch('/api/upload', {
+      const res = await fetch(resolveApiUrl('/api/upload'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: fd,
@@ -462,10 +464,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     if (!token) return;
     try {
       const [prodRes, userRes, orderRes, auditRes] = await Promise.all([
-        fetch('/api/products').catch(() => null),
-        fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
-        fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
-        fetch('/api/admin/audit-logs', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+        fetch(resolveApiUrl('/api/products')).catch(() => null),
+        fetch(resolveApiUrl('/api/admin/users'), { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+        fetch(resolveApiUrl('/api/admin/orders'), { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+        fetch(resolveApiUrl('/api/admin/audit-logs'), { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
       ]);
       
       const p = prodRes && prodRes.ok ? await prodRes.json().catch(() => []) : [];
@@ -489,7 +491,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   // Product Handlers
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const url = editingId ? `/api/products/${editingId}` : '/api/products';
+    const url = resolveApiUrl(editingId ? `/api/products/${editingId}` : '/api/products');
     const method = editingId ? 'PUT' : 'POST';
     try {
       const res = await fetch(url, {
@@ -517,7 +519,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   const handleDeleteProduct = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this product forever?')) return;
     try {
-      const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(resolveApiUrl(`/api/products/${id}`), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) fetchData();
     } catch (err) {
       console.error(err);
@@ -530,11 +532,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     if (!token) return;
     setUpdatingOrderId(orderId);
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const res = await fetch(resolveApiUrl(`/api/admin/orders/${orderId}/status`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status }),
       });
+
       if (!res.ok) throw new Error('Failed to update order status');
       setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: status as Order['status'] } : o)));
     } catch (err) {
