@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { resolveMediaUrl } from '../utils/api';
 import './CartDrawer.css';
 
 type Step = 'bag' | 'shipping' | 'confirmed';
@@ -56,22 +56,23 @@ const CartDrawer: React.FC = () => {
     }
   };
 
-
   return (
     <AnimatePresence>
       {isCartOpen && (
         <motion.div
           className="cart-overlay"
+          data-lenis-prevent
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
             className="cart-drawer"
+            data-lenis-prevent
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
+            transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
           >
             <div className="cart-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
@@ -95,7 +96,7 @@ const CartDrawer: React.FC = () => {
             {/* Step 1: Bag contents */}
             {step === 'bag' && (
               <>
-                <div className="cart-content">
+                <div className="cart-content" data-lenis-prevent>
                   {cart.length === 0 ? (
                     <div className="cart-empty">
                       <ShoppingBag size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
@@ -104,7 +105,27 @@ const CartDrawer: React.FC = () => {
                   ) : (
                     cart.map(item => (
                       <div className="cart-item" key={item.id}>
-                        <img src={item.img} alt={item.name} className="cart-item-img" />
+                        {item.img && (item.img.endsWith('.mp4') || item.img.endsWith('.webm') || item.img.endsWith('.mov')) ? (
+                          <video
+                            src={resolveMediaUrl(item.img)}
+                            poster="/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="cart-item-img"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <img
+                            src={resolveMediaUrl(item.img)}
+                            alt={item.name}
+                            className="cart-item-img"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg';
+                            }}
+                          />
+                        )}
                         <div className="cart-item-info">
                           <h4 className="cart-item-title">{item.name}</h4>
                           <div className="cart-item-price">{item.price}</div>
@@ -128,6 +149,7 @@ const CartDrawer: React.FC = () => {
                 )}
               </>
             )}
+
 
             {/* Step 2: Shipping form */}
             {step === 'shipping' && (

@@ -48,21 +48,77 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (token && user) {
+      // Sync guest cart items to user account first
+      const guestCartRaw = localStorage.getItem('hov_guest_cart');
+      const guestItems: CartItem[] = guestCartRaw ? JSON.parse(guestCartRaw) : [];
+
       fetch('/api/cart', {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setCart(data);
+      .then(async (serverData) => {
+        if (Array.isArray(serverData)) {
+          if (guestItems.length > 0) {
+            // Upload guest items to server
+            for (const item of guestItems) {
+              await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                  product_id: item.product_id,
+                  name: item.name,
+                  price: item.price,
+                  img: item.img,
+                  category: item.category
+                })
+              }).catch(() => {});
+            }
+            localStorage.removeItem('hov_guest_cart');
+            // Re-fetch merged cart
+            const mergedRes = await fetch('/api/cart', { headers: { Authorization: `Bearer ${token}` } });
+            const mergedData = await mergedRes.json();
+            if (Array.isArray(mergedData)) setCart(mergedData);
+          } else {
+            setCart(serverData);
+          }
+        }
       })
       .catch(console.error);
     } else {
-      setCart([]);
+      // Load guest cart from localStorage
+      const guestCartRaw = localStorage.getItem('hov_guest_cart');
+      if (guestCartRaw) {
+        try {
+          setCart(JSON.parse(guestCartRaw));
+        } catch {
+          setCart([]);
+        }
+      } else {
+        setCart([]);
+      }
     }
   }, [token, user]);
 
   const addToCart = async (item: Omit<CartItem, 'id' | 'user_id'>) => {
-    if (!token) return alert('Please login to add to cart');
+    if (!token) {
+      // Allow guest shoppers to add to cart smoothly
+      const guestItem: CartItem = {
+        id: Date.now(),
+        product_id: item.product_id,
+        name: item.name,
+        price: item.price,
+        img: item.img,
+        category: item.category
+      };
+      setCart(prev => {
+        const next = [...prev, guestItem];
+        localStorage.setItem('hov_guest_cart', JSON.stringify(next));
+        return next;
+      });
+      setIsCartOpen(true);
+      return;
+    }
+
     try {
       const res = await fetch('/api/cart', {
         method: 'POST',
@@ -80,6 +136,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeFromCart = async (id: number) => {
+    if (!token) {
+      setCart(prev => {
+        const next = prev.filter(c => c.id !== id);
+        localStorage.setItem('hov_guest_cart', JSON.stringify(next));
+        return next;
+      });
+      return;
+    }
+
     try {
       await fetch(`/api/cart/${id}`, {
         method: 'DELETE',
@@ -90,6 +155,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error(err);
     }
   };
+
 
   const checkout = async (shipping: ShippingDetails) => {
     if (!token) return { success: false, error: 'Please sign in to place your order.' };
