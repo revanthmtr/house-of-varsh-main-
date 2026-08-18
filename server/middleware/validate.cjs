@@ -46,12 +46,13 @@ const productSchema = z.object({
 
 
 const addToCartSchema = z.object({
-  product_id: z.number().int().optional(),
+  product_id: z.number().or(z.string().transform(Number)).optional().nullable(),
   name: z.string().min(1, 'Item name is required'),
   price: z.string().or(z.number()).transform(String),
-  img: z.string().optional(),
-  category: z.string().optional(),
+  img: z.string().optional().nullable(),
+  category: z.string().optional().nullable(),
 });
+
 
 const checkoutSchema = z.object({
   name: z.string().min(1, 'Shipping recipient name is required'),

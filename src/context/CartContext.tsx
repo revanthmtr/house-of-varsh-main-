@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { resolveApiUrl } from '../utils/api';
 
 export interface CartItem {
   id: number;
@@ -21,7 +22,7 @@ export interface ShippingDetails {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: Omit<CartItem, 'id' | 'user_id'>) => Promise<void>;
+  addToCart: (item: Omit<CartItem, 'id'>) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
   checkout: (shipping: ShippingDetails) => Promise<{ success: boolean; error?: string; orderId?: number }>;
   isCartOpen: boolean;
@@ -36,163 +37,232 @@ const CartContext = createContext<CartContextType>({
   checkout: async () => ({ success: false }),
   isCartOpen: false,
   setIsCartOpen: () => {},
-  cartTotal: 0
+  cartTotal: 0,
 });
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, user } = useAuth();
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    // Immediate hydrate from guest storage to prevent initial flicker
+    try {
+      const stored = localStorage.getItem('hov_guest_cart');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  useEffect(() => {
-    if (token && user) {
-      // Sync guest cart items to user account first
+  // Sync cart with backend whenever auth changes
+  const fetchUserCart = useCallback(async (authToken: string) => {
+    try {
+      // 1. Check if there were guest items to merge
       const guestCartRaw = localStorage.getItem('hov_guest_cart');
       const guestItems: CartItem[] = guestCartRaw ? JSON.parse(guestCartRaw) : [];
 
-      fetch('/api/cart', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(async (serverData) => {
-        if (Array.isArray(serverData)) {
-          if (guestItems.length > 0) {
-            // Upload guest items to server
-            for (const item of guestItems) {
-              await fetch('/api/cart', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({
-                  product_id: item.product_id,
-                  name: item.name,
-                  price: item.price,
-                  img: item.img,
-                  category: item.category
-                })
-              }).catch(() => {});
-            }
-            localStorage.removeItem('hov_guest_cart');
-            // Re-fetch merged cart
-            const mergedRes = await fetch('/api/cart', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(resolveApiUrl('/api/cart'), {
+        headers: { Authorization: `Bearer ${authToken}`, Accept: 'application/json' },
+      });
+
+      if (!res.ok) throw new Error('Failed to load bag from server');
+      const serverData = await res.json();
+
+      if (Array.isArray(serverData)) {
+        if (guestItems.length > 0) {
+          // Upload guest items to server
+          for (const item of guestItems) {
+            await fetch(resolveApiUrl('/api/cart'), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+              body: JSON.stringify({
+                product_id: item.product_id || 0,
+                name: item.name,
+                price: String(item.price),
+                img: item.img || '',
+                category: item.category || 'new',
+              }),
+            }).catch(() => {});
+          }
+          localStorage.removeItem('hov_guest_cart');
+
+          // Re-fetch merged cart
+          const mergedRes = await fetch(resolveApiUrl('/api/cart'), {
+            headers: { Authorization: `Bearer ${authToken}`, Accept: 'application/json' },
+          });
+          if (mergedRes.ok) {
             const mergedData = await mergedRes.json();
             if (Array.isArray(mergedData)) setCart(mergedData);
-          } else {
-            setCart(serverData);
           }
+        } else {
+          setCart(serverData);
         }
-      })
-      .catch(console.error);
+      }
+    } catch (err) {
+      console.warn('Backend cart sync note (using cached/local bag):', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token && user) {
+      fetchUserCart(token);
     } else {
-      // Load guest cart from localStorage
-      const guestCartRaw = localStorage.getItem('hov_guest_cart');
-      if (guestCartRaw) {
-        try {
-          setCart(JSON.parse(guestCartRaw));
-        } catch {
-          setCart([]);
-        }
-      } else {
+      // Guest state
+      try {
+        const stored = localStorage.getItem('hov_guest_cart');
+        setCart(stored ? JSON.parse(stored) : []);
+      } catch {
         setCart([]);
       }
     }
-  }, [token, user]);
+  }, [token, user, fetchUserCart]);
 
-  const addToCart = async (item: Omit<CartItem, 'id' | 'user_id'>) => {
+  /**
+   * High-Performance Optimistic Add-To-Bag
+   * Adds the item instantly to state with 0ms visual latency, opens the private bag drawer,
+   * and synchronizes with the server in the background.
+   */
+  const addToCart = async (item: Omit<CartItem, 'id'>) => {
+    const tempId = Date.now();
+    const newItem: CartItem = {
+      id: tempId,
+      product_id: item.product_id || 0,
+      name: item.name,
+      price: String(item.price),
+      img: item.img || '',
+      category: item.category || 'new',
+    };
+
+    // 1. Instant UI update (Optimistic)
+    setCart((prev) => [...prev, newItem]);
+    setIsCartOpen(true);
+
+    // 2. Persist to guest local storage
     if (!token) {
-      // Allow guest shoppers to add to cart smoothly
-      const guestItem: CartItem = {
-        id: Date.now(),
-        product_id: item.product_id,
-        name: item.name,
-        price: item.price,
-        img: item.img,
-        category: item.category
-      };
-      setCart(prev => {
-        const next = [...prev, guestItem];
-        localStorage.setItem('hov_guest_cart', JSON.stringify(next));
-        return next;
-      });
-      setIsCartOpen(true);
+      localStorage.setItem('hov_guest_cart', JSON.stringify([...cart, newItem]));
       return;
     }
 
+    // 3. Authenticated Server Sync
     try {
-      const res = await fetch('/api/cart', {
+      const res = await fetch(resolveApiUrl('/api/cart'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(item)
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: newItem.product_id,
+          name: newItem.name,
+          price: newItem.price,
+          img: newItem.img,
+          category: newItem.category,
+        }),
       });
-      const data = await res.json();
-      if (data.id) {
-        setCart(prev => [...prev, data]);
-        setIsCartOpen(true);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.id) {
+          // Replace tempId with real database ID
+          setCart((prev) => prev.map((c) => (c.id === tempId ? { ...c, id: data.id } : c)));
+        }
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        if (errData.message && errData.message.includes('sold out')) {
+          alert(errData.message);
+          setCart((prev) => prev.filter((c) => c.id !== tempId));
+        }
       }
     } catch (err) {
-      console.error(err);
+      console.error('Server sync error on addToCart:', err);
+      // Item remains safely in local state for seamless shopping
     }
   };
 
+  /**
+   * Optimistic Removal
+   */
   const removeFromCart = async (id: number) => {
-    if (!token) {
-      setCart(prev => {
-        const next = prev.filter(c => c.id !== id);
+    // 1. Instant UI update
+    setCart((prev) => {
+      const next = prev.filter((c) => c.id !== id);
+      if (!token) {
         localStorage.setItem('hov_guest_cart', JSON.stringify(next));
-        return next;
-      });
-      return;
-    }
+      }
+      return next;
+    });
 
+    if (!token) return;
+
+    // 2. Server Sync
     try {
-      await fetch(`/api/cart/${id}`, {
+      await fetch(resolveApiUrl(`/api/cart/${id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
       });
-      setCart(prev => prev.filter(c => c.id !== id));
     } catch (err) {
-      console.error(err);
+      console.error('Server sync error on removeFromCart:', err);
     }
   };
 
-
+  /**
+   * Cash on Delivery / Standard Checkout
+   */
   const checkout = async (shipping: ShippingDetails) => {
-    if (!token) return { success: false, error: 'Please sign in to place your order.' };
-    if (cart.length === 0) return { success: false, error: 'Your bag is empty.' };
+    if (!token) return { success: false, error: 'Please sign in or create an account to place your order.' };
+    if (cart.length === 0) return { success: false, error: 'Your bag is currently empty.' };
+
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch(resolveApiUrl('/api/checkout'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...shipping, items: cart })
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ...shipping, items: cart }),
       });
 
       let data: any = {};
-      const contentType = res.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await res.json().catch(() => ({}));
+      try {
+        data = await res.json();
+      } catch {
+        data = {};
       }
 
-      if (!res.ok) {
-        return { success: false, error: data.error || data.message || `Order placement failed (${res.status})` };
+      if (res.ok) {
+        setCart([]);
+        localStorage.removeItem('hov_guest_cart');
+        return { success: true, orderId: data.order?.id };
+      } else {
+        return { success: false, error: data.error || 'Failed to place order. Please try again.' };
       }
-      setCart([]);
-      return { success: true, orderId: data.order?.id };
     } catch (err: any) {
-      console.error(err);
-      return { success: false, error: err.message || 'Unable to connect to order server. Please try again.' };
+      console.error('Checkout network error:', err);
+      return { success: false, error: 'Network error connecting to server. Please try again.' };
     }
   };
 
-
-  const cartTotal = cart.reduce((total, item) => {
-    const p = parseFloat(String(item.price).replace(/[^0-9.]/g, ''));
-    return total + (isNaN(p) ? 0 : p);
+  // Cart total computation in INR
+  const cartTotal = cart.reduce((sum, item) => {
+    const numeric = parseFloat(String(item.price).replace(/[^0-9.]/g, ''));
+    return sum + (isNaN(numeric) ? 0 : numeric);
   }, 0);
 
-
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, checkout, isCartOpen, setIsCartOpen, cartTotal }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        checkout,
+        isCartOpen,
+        setIsCartOpen,
+        cartTotal,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

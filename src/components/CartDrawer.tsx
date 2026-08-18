@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { resolveMediaUrl } from '../utils/api';
+import { resolveMediaUrl, resolveApiUrl } from '../utils/api';
 import './CartDrawer.css';
 
 type Step = 'bag' | 'shipping' | 'confirmed';
@@ -91,7 +91,7 @@ const CartDrawer: React.FC = () => {
         }
 
         // 1. Create Razorpay order on backend
-        const orderRes = await fetch('/api/payment/create-order', {
+        const orderRes = await fetch(resolveApiUrl('/api/payment/create-order'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ const CartDrawer: React.FC = () => {
           }) => {
             try {
               // 3. Verify Payment Signature & Create Confirmed Order on Backend
-              const verifyRes = await fetch('/api/payment/verify', {
+              const verifyRes = await fetch(resolveApiUrl('/api/payment/verify'), {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -150,6 +150,7 @@ const CartDrawer: React.FC = () => {
                   shipping: form,
                 }),
               });
+
 
               const verifyData = await verifyRes.json();
               if (!verifyRes.ok) {
