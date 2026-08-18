@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: house-of-varsh-api
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.cjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_TRB4I5DXNkWEeW
+      - key: RAZORPAY_KEY_SECRET
+        value: IgZjRgxOtTIkiHT5VefAXS61

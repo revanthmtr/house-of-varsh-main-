@@ -1,4 +1,9 @@
 require('dotenv').config();
+
+// ── Built-in Payment Gateway Defaults (override via Render env vars for production) ──
+if (!process.env.RAZORPAY_KEY_ID)     process.env.RAZORPAY_KEY_ID     = 'rzp_test_TRB4I5DXNkWEeW';
+if (!process.env.RAZORPAY_KEY_SECRET) process.env.RAZORPAY_KEY_SECRET = 'IgZjRgxOtTIkiHT5VefAXS61';
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
