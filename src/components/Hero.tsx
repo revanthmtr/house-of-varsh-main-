@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useSiteContent } from '../context/SiteContentContext';
 import './Hero.css';
@@ -6,7 +6,13 @@ import './Hero.css';
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 1000], [0, 250]);
+  // Disable parallax on touch/mobile — it causes GPU overhead and frame drops on iOS/Android
+  const isTouch = useMemo(() =>
+    typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
+  []);
+  const yDesktop = useTransform(scrollY, [0, 1000], [0, 250]);
+  // On mobile, pass 0 (no parallax) to eliminate GPU layer promotion costs
+  const y = isTouch ? 0 : yDesktop;
   const { get } = useSiteContent();
 
   const slides = [

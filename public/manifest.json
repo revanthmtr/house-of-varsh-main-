@@ -1,0 +1,27 @@
+{
+  "name": "House of Varsh",
+  "short_name": "House of Varsh",
+  "description": "India's finest luxury couture brand — premium handcrafted silk sarees, designer lehengas & bespoke bridal wear.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2A0108",
+  "theme_color": "#2A0108",
+  "icons": [
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "lifestyle"],
+  "lang": "en-IN",
+  "dir": "ltr"
+}

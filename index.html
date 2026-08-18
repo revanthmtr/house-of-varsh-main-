@@ -2,15 +2,29 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
+    <!-- ══ Favicon — Full Multi-Size Set (Browser / iOS / Android) ══ -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
     <link rel="icon" type="image/png" href="/chinni_favicon.png" />
-    <link rel="apple-touch-icon" href="/brand_identity_logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <!-- ══ Viewport & PWA Capabilities ══ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="theme-color" content="#2A0108" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#2A0108" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="House of Varsh" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    <!-- ══ Instant dark bg — prevents white flash on load ══ -->
+    <style>
+      html, body { background: #2A0108; }
+      #root { opacity: 0; transition: opacity 0.35s ease; }
+      #root.ready { opacity: 1; }
+    </style>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- PRIMARY SEO META TAGS — Crafted for Maximum SERP Ranking  -->
@@ -60,9 +74,12 @@
     <!-- ═══════════════════════════════════════════════════════════ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://house-of-varsh-api.onrender.com" crossorigin />
     <link rel="dns-prefetch" href="https://house-of-varsh-api.onrender.com" />
-    <link rel="preload" as="image" href="/house_of_varsh-2026-08-12/683650085_18070177769422704_4642689253014659001_n.jpg" fetchpriority="high" />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" />
+    <!-- LCP Hero Image — highest priority fetch, no lazy, no async -->
+    <link rel="preload" as="image" fetchpriority="high"
+          href="/house_of_varsh-2026-08-12/683650085_18070177769422704_4642689253014659001_n.jpg" />
+    <!-- Non-blocking Google Fonts — swap prevents FOIT -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -244,6 +261,43 @@
     </script>
   </head>
   <body>
+    <!-- Loading splash — shown instantly, removed once React hydrates -->
+    <div id="hov-splash" aria-hidden="true" style="
+      position:fixed;inset:0;z-index:999999;
+      background:#2A0108;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:1.5rem;
+    ">
+      <img src="/chinni_favicon.png" alt="House of Varsh" width="90" height="90"
+           style="object-fit:contain;animation:hovSpin 1.4s ease-in-out infinite alternate;"
+           fetchpriority="high" />
+      <div style="
+        width:120px;height:2px;background:rgba(197,155,39,0.25);border-radius:2px;overflow:hidden;
+      ">
+        <div id="hov-bar" style="
+          height:100%;width:0%;background:linear-gradient(90deg,#C59B27,#F3E5AB,#C59B27);
+          border-radius:2px;transition:width 0.4s ease;
+        "></div>
+      </div>
+      <p style="color:rgba(231,210,168,0.6);font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;font-family:serif;">House of Varsh</p>
+    </div>
+    <style>
+      @keyframes hovSpin{
+        0%{transform:scale(0.95) rotate(-4deg);opacity:0.85;}
+        100%{transform:scale(1.05) rotate(4deg);opacity:1;}
+      }
+    </style>
+    <script>
+      // Animate progress bar while JS loads
+      (function(){
+        var bar=document.getElementById('hov-bar'),p=0;
+        var t=setInterval(function(){
+          p=p<85?p+Math.random()*8:p;
+          if(bar)bar.style.width=Math.min(p,85)+'%';
+        },120);
+        window.__hovSplashTimer=t;
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

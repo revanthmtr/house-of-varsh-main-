@@ -134,13 +134,17 @@ const GoogleOneTap = () => {
 
 function App() {
   useEffect(() => {
+    // Detect touch/coarse pointer (iOS, Android)
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
     const lenis = new Lenis({
-      lerp: 0.08,
+      lerp: isTouch ? 0.12 : 0.08,         // Slightly snappier on touch for zero lag feel
       wheelMultiplier: 1.1,
-      touchMultiplier: 2,
+      touchMultiplier: isTouch ? 1.6 : 2,   // Slower touch multi = fewer dropped frames
       orientation: 'vertical',
       gestureOrientation: 'vertical',
-      syncTouch: true
+      syncTouch: isTouch,                    // Locks to native touch on iOS for 60fps scroll
+      smoothWheel: !isTouch,                 // No smooth wheel on touch; iOS handles natively
     });
 
     let rafId: number;
@@ -156,6 +160,7 @@ function App() {
       cancelAnimationFrame(rafId);
     };
   }, []);
+
 
   return (
     <AuthProvider>

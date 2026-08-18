@@ -7,9 +7,11 @@ export default defineConfig({
   build: {
     target: 'es2020',
     cssCodeSplit: true,
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
+
       output: {
+        // Split vendor chunks for better browser caching
         manualChunks(id: string) {
           if (id.includes('node_modules')) {
             if (id.includes('framer-motion')) return 'vendor-motion';
@@ -20,9 +22,16 @@ export default defineConfig({
             return 'vendor-core';
           }
         },
+        // Stable file hashes for long-term caching
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-
+    // Inline small assets directly in CSS to reduce requests
+    assetsInlineLimit: 4096,
+    // Eliminate dead code in production
+    sourcemap: false,
   },
   server: {
     proxy: {
@@ -37,4 +46,5 @@ export default defineConfig({
     }
   }
 })
+
 

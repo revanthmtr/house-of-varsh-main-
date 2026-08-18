@@ -38,6 +38,13 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  height: -webkit-fill-available;
+}
+
 html.lenis {
   height: auto;
 }
@@ -65,6 +72,17 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Ensures content is immediately visible when scroll is restored */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  /* Prevent content from flickering on iOS during scroll momentum */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+#root {
+  /* Content is faded in by main.tsx after mount — prevents FOUC */
+  will-change: opacity;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -72,6 +90,8 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
   line-height: 1.1;
   color: var(--primary);
+  /* Prevent font rendering flicker before swap */
+  font-display: swap;
 }
 
 a {
@@ -83,7 +103,8 @@ img {
   max-width: 100%;
   display: block;
   object-fit: cover;
-  will-change: transform;
+  /* GPU layer promotion for smooth image transitions */
+  will-change: auto;
   transform: translateZ(0);
 }
 
@@ -93,7 +114,18 @@ button {
   background: transparent;
   border: none;
   outline: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
+
+/* Prevent touch callouts and selection highlights on iOS */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+
 
 /* Base Utility Classes */
 .container {

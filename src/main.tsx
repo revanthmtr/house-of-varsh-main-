@@ -40,5 +40,39 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       </GoogleOAuthProvider>
     </ErrorBoundary>
   </React.StrictMode>,
-)
+);
 
+// ── Dismiss branded splash screen once React has painted ────────────────────
+function dismissSplash() {
+  const splash = document.getElementById('hov-splash');
+  const root = document.getElementById('root');
+  const bar = document.getElementById('hov-bar');
+
+  // Complete the progress bar first
+  if (bar) bar.style.width = '100%';
+
+  // Stop the fake progress timer
+  if ((window as any).__hovSplashTimer) {
+    clearInterval((window as any).__hovSplashTimer);
+  }
+
+  setTimeout(() => {
+    if (splash) {
+      splash.style.transition = 'opacity 0.45s ease';
+      splash.style.opacity = '0';
+      setTimeout(() => {
+        splash.remove();
+      }, 460);
+    }
+    if (root) {
+      root.classList.add('ready');
+    }
+  }, 200);
+}
+
+// Use requestIdleCallback for best paint timing; fallback to rAF
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(dismissSplash, { timeout: 2000 });
+} else {
+  requestAnimationFrame(() => requestAnimationFrame(dismissSplash));
+}
