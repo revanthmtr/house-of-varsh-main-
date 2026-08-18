@@ -1,5 +1,6 @@
 const paymentService = require('../services/paymentService.cjs');
-const { logAudit } = require('../services/auditService.cjs');
+const { logAudit } = require('../services/authService.cjs');
+
 
 const parsePrice = (priceStr) => {
   const n = parseFloat(String(priceStr).replace(/[^0-9.]/g, ''));
