@@ -11,6 +11,14 @@ const { authenticate, requireAdmin } = require('./middleware/authMiddleware.cjs'
 const { apiRateLimiter } = require('./middleware/rateLimiter.cjs');
 const errorHandler = require('./middleware/errorHandler.cjs');
 const { pool, db } = require('./config/db.cjs');
+const runMigrations = require('./db/migrate.cjs');
+
+// Auto-sync PostgreSQL schema and run migrations safely
+if (process.env.DATABASE_URL) {
+  runMigrations().catch((err) => {
+    console.warn('⚠️ Auto-migration note:', err.message);
+  });
+}
 
 const authRoutes = require('./routes/authRoutes.cjs');
 const productRoutes = require('./routes/productRoutes.cjs');
@@ -21,6 +29,7 @@ const adminRoutes = require('./routes/adminRoutes.cjs');
 const paymentRoutes = require('./routes/paymentRoutes.cjs');
 
 const app = express();
+
 
 const PORT = process.env.PORT || 5001;
 
