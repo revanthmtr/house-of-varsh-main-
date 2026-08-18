@@ -23,21 +23,24 @@ const getAllProducts = async ({ page, limit, category } = {}) => {
   return await queryAll(sql, params);
 };
 
-const createProduct = async ({ name, price, category, img, badge }) => {
+const createProduct = async ({ name, price, category, img, badge, is_sold_out }) => {
+  const soldOutVal = is_sold_out === true || is_sold_out === 'true' || is_sold_out === 1 ? true : false;
   const result = await queryRun(
-    'INSERT INTO products (name, price, category, img, badge) VALUES (?, ?, ?, ?, ?)',
-    [name, price, category, img, badge || null]
+    'INSERT INTO products (name, price, category, img, badge, is_sold_out) VALUES (?, ?, ?, ?, ?, ?)',
+    [name, price, category, img, badge || null, soldOutVal]
   );
-  return { id: result.lastID, name, price, category, img, badge };
+  return { id: result.lastID, name, price, category, img, badge, is_sold_out: soldOutVal };
 };
 
-const updateProduct = async (id, { name, price, category, img, badge }) => {
+const updateProduct = async (id, { name, price, category, img, badge, is_sold_out }) => {
+  const soldOutVal = is_sold_out === true || is_sold_out === 'true' || is_sold_out === 1 ? true : false;
   await queryRun(
-    'UPDATE products SET name = ?, price = ?, category = ?, img = ?, badge = ? WHERE id = ?',
-    [name, price, category, img, badge || null, id]
+    'UPDATE products SET name = ?, price = ?, category = ?, img = ?, badge = ?, is_sold_out = ? WHERE id = ?',
+    [name, price, category, img, badge || null, soldOutVal, id]
   );
-  return { id, name, price, category, img, badge };
+  return { id, name, price, category, img, badge, is_sold_out: soldOutVal };
 };
+
 
 const deleteProduct = async (id) => {
   await queryRun('DELETE FROM products WHERE id = ?', [id]);

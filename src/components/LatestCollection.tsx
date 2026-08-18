@@ -108,8 +108,12 @@ const LatestCollection = () => {
                 transition={{ duration: 0.2, ease: 'easeOut' }}
               >
 
-                <div className="product-image-container">
-                  {product.badge && <div className="product-badge">{product.badge}</div>}
+                <div className={`product-image-container ${product.is_sold_out ? 'product-image-sold-out' : ''}`}>
+                  {product.is_sold_out ? (
+                    <div className="product-badge sold-out-badge">SOLD OUT</div>
+                  ) : product.badge ? (
+                    <div className="product-badge">{product.badge}</div>
+                  ) : null}
                   
                   <button 
                     className={`wishlist-btn ${wishlist.includes(product.id) ? 'active' : ''}`}
@@ -144,22 +148,28 @@ const LatestCollection = () => {
                     />
                   )}
 
-                  <div
-                    className="quick-add-overlay"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart({ 
-                        product_id: product.id, 
-                        name: product.name, 
-                        price: product.price, 
-                        img: product.img, 
-                        category: product.category 
-                      });
-                    }}
-                  >
-                    <ShoppingBag size={14} />
-                    <span>Quick Add to Bag</span>
-                  </div>
+                  {product.is_sold_out ? (
+                    <div className="quick-add-overlay sold-out-overlay" onClick={(e) => e.stopPropagation()}>
+                      <span>Sold Out</span>
+                    </div>
+                  ) : (
+                    <div
+                      className="quick-add-overlay"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart({ 
+                          product_id: product.id, 
+                          name: product.name, 
+                          price: product.price, 
+                          img: product.img, 
+                          category: product.category 
+                        });
+                      }}
+                    >
+                      <ShoppingBag size={14} />
+                      <span>Quick Add to Bag</span>
+                    </div>
+                  )}
                 </div>
                 <div className="product-info">
                   <h3 className="product-name">{product.name}</h3>
@@ -167,22 +177,31 @@ const LatestCollection = () => {
                   
                   <button
                     type="button"
-                    className="product-card-add-btn"
-                    onClick={() =>
+                    className={`product-card-add-btn ${product.is_sold_out ? 'product-card-sold-out-btn' : ''}`}
+                    disabled={product.is_sold_out}
+                    onClick={() => {
+                      if (product.is_sold_out) return;
                       addToCart({
                         product_id: product.id,
                         name: product.name,
                         price: product.price,
                         img: product.img,
                         category: product.category,
-                      })
-                    }
-                    aria-label={`Add ${product.name} to shopping bag`}
+                      });
+                    }}
+                    aria-label={product.is_sold_out ? `${product.name} is Sold Out` : `Add ${product.name} to shopping bag`}
                   >
-                    <ShoppingBag size={13} />
-                    <span>Add to Bag</span>
+                    {product.is_sold_out ? (
+                      <span>Sold Out</span>
+                    ) : (
+                      <>
+                        <ShoppingBag size={13} />
+                        <span>Add to Bag</span>
+                      </>
+                    )}
                   </button>
                 </div>
+
               </motion.div>
             ))}
           </div>

@@ -41,7 +41,9 @@ const productSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   img: z.string().min(1, 'Image URL is required'),
   badge: z.string().nullable().optional(),
+  is_sold_out: z.boolean().or(z.number()).or(z.string()).optional(),
 });
+
 
 const addToCartSchema = z.object({
   product_id: z.number().int().optional(),

@@ -272,6 +272,34 @@
   transform: scale(0.97);
 }
 
+.sold-out-badge {
+  background: linear-gradient(135deg, #7A001C 0%, #4A0010 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(212, 175, 55, 0.7) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  letter-spacing: 0.18em !important;
+}
+
+.product-image-sold-out img,
+.product-image-sold-out video {
+  filter: grayscale(20%) brightness(0.92);
+}
+
+.product-card-sold-out-btn {
+  background: rgba(120, 20, 40, 0.12) !important;
+  color: #A06070 !important;
+  border: 1px solid rgba(139, 28, 51, 0.3) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.75;
+}
+
+.product-card-sold-out-btn:active {
+  transform: none !important;
+  background: rgba(120, 20, 40, 0.12) !important;
+}
+
+
 /* Responsive Breakpoints & Touch Devices */
 @media (max-width: 1024px), (hover: none), (pointer: coarse) {
   .shop-collection {

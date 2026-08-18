@@ -21,8 +21,10 @@ CREATE TABLE IF NOT EXISTS products (
     price VARCHAR(100),
     category VARCHAR(100),
     img TEXT,
-    badge VARCHAR(100)
+    badge VARCHAR(100),
+    is_sold_out BOOLEAN DEFAULT FALSE
 );
+
 
 CREATE TABLE IF NOT EXISTS cart_items (
     id SERIAL PRIMARY KEY,

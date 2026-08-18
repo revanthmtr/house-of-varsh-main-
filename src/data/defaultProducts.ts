@@ -5,7 +5,9 @@ export interface Product {
   category: string;
   img: string;
   badge?: string;
+  is_sold_out?: boolean;
 }
+
 
 export const DEFAULT_PRODUCTS: Product[] = [
   {

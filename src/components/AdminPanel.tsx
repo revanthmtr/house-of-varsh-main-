@@ -21,7 +21,9 @@ interface Product {
   category: string;
   img: string;
   badge?: string;
+  is_sold_out?: boolean;
 }
+
 
 interface User {
   id: number;
@@ -435,7 +437,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   
   // Product Form State
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: '', price: '', category: 'new', img: '', badge: '' });
+  const [formData, setFormData] = useState({ name: '', price: '', category: 'new', img: '', badge: '', is_sold_out: false });
   const [isUploadingProductImg, setIsUploadingProductImg] = useState(false);
 
   const handleProductImgUpload = async (file: File) => {
@@ -502,7 +504,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       if (!res.ok) throw new Error('Failed to save product');
       fetchData();
       setEditingId(null);
-      setFormData({ name: '', price: '', category: 'new', img: '', badge: '' });
+      setFormData({ name: '', price: '', category: 'new', img: '', badge: '', is_sold_out: false });
     } catch (err) {
       console.error(err);
       alert('Error saving product');
@@ -511,10 +513,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
 
   const handleEditProduct = (product: Product) => {
     setEditingId(product.id);
-    setFormData({ name: product.name, price: product.price, category: product.category, img: product.img, badge: product.badge || '' });
+    setFormData({
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      img: product.img,
+      badge: product.badge || '',
+      is_sold_out: Boolean(product.is_sold_out),
+    });
     setActiveMenu('products');
   };
 
+  const handleToggleSoldOut = async (product: Product) => {
+    if (!token) return;
+    const newStatus = !product.is_sold_out;
+    try {
+      const res = await fetch(resolveApiUrl(`/api/products/${product.id}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          name: product.name,
+          price: product.price,
+          category: product.category,
+          img: product.img,
+          badge: product.badge || '',
+          is_sold_out: newStatus,
+        }),
+      });
+      if (res.ok) {
+        setProducts(prev => prev.map(p => (p.id === product.id ? { ...p, is_sold_out: newStatus } : p)));
+      } else {
+        throw new Error('Failed to toggle stock status');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update stock status.');
+    }
+  };
 
   const handleDeleteProduct = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this product forever?')) return;
@@ -525,6 +560,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       console.error(err);
     }
   };
+
 
   // Order Handlers
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
@@ -1061,10 +1097,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                             <label>Highlight Badge (Optional)</label>
                             <input type="text" className="ap-input" placeholder="e.g. LIMITED EDITION, COUTURE" value={formData.badge} onChange={e => setFormData({ ...formData, badge: e.target.value })} />
                           </div>
+
+                          <div className="ap-field" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(212,175,55,0.06)', padding: '0.85rem 1rem', borderRadius: '6px', border: '1px solid rgba(212,175,55,0.18)' }}>
+                            <input
+                              type="checkbox"
+                              id="is_sold_out_toggle"
+                              style={{ width: '20px', height: '20px', accentColor: '#8B1C33', cursor: 'pointer' }}
+                              checked={formData.is_sold_out}
+                              onChange={e => setFormData({ ...formData, is_sold_out: e.target.checked })}
+                            />
+                            <label htmlFor="is_sold_out_toggle" style={{ margin: 0, cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem', color: formData.is_sold_out ? '#ff5252' : 'inherit' }}>
+                              {formData.is_sold_out ? '🔴 Mark as Sold Out / Out of Stock' : '🟢 In Stock (Active & Buyable)'}
+                            </label>
+                          </div>
+
                           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
                             <button type="submit" className="ap-btn-primary" style={{ flex: 1 }}>{editingId ? 'Update Product' : 'Publish Product'}</button>
                             {editingId && (
-                              <button type="button" className="ap-btn-outline" onClick={() => { setEditingId(null); setFormData({ name: '', price: '', category: 'new', img: '', badge: '' }); }}>Cancel</button>
+                              <button type="button" className="ap-btn-outline" onClick={() => { setEditingId(null); setFormData({ name: '', price: '', category: 'new', img: '', badge: '', is_sold_out: false }); }}>Cancel</button>
                             )}
                           </div>
                         </form>
@@ -1074,31 +1124,51 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                     {/* Products List */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       {products.map(product => (
-                        <div className="ap-product-card" key={product.id}>
-                          {product.img && (product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov')) ? (
-                            <video src={resolveMediaUrl(product.img)} autoPlay loop muted playsInline style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px' }} />
-                          ) : (
-                            <img
-                              src={resolveMediaUrl(product.img)}
-                              alt={product.name}
-                              loading="lazy"
-                              decoding="async"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg';
-                              }}
-                            />
-                          )}
+                        <div className={`ap-product-card ${product.is_sold_out ? 'ap-product-card-sold-out' : ''}`} key={product.id}>
+                          <div style={{ position: 'relative', width: '68px', height: '68px', flexShrink: 0 }}>
+                            {product.img && (product.img.endsWith('.mp4') || product.img.endsWith('.webm') || product.img.endsWith('.mov')) ? (
+                              <video src={resolveMediaUrl(product.img)} autoPlay loop muted playsInline style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px' }} />
+                            ) : (
+                              <img
+                                src={resolveMediaUrl(product.img)}
+                                alt={product.name}
+                                loading="lazy"
+                                decoding="async"
+                                style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px' }}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '/house_of_varsh-2026-08-12/688853648_18071480609422704_8771821116478855746_n.jpg';
+                                }}
+                              />
+                            )}
+                            {product.is_sold_out && (
+                              <span style={{ position: 'absolute', bottom: '3px', left: '3px', right: '3px', background: 'rgba(139,28,51,0.92)', color: '#fff', fontSize: '0.55rem', fontWeight: 700, padding: '2px 0', borderRadius: '3px', textAlign: 'center', letterSpacing: '0.04em' }}>
+                                SOLD OUT
+                              </span>
+                            )}
+                          </div>
 
                           <div className="ap-info">
-                            <h4>{product.name}</h4>
+                            <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              {product.name}
+                              {product.is_sold_out && <span style={{ color: '#ff5252', fontSize: '0.75rem', fontWeight: 700 }}>(Sold Out)</span>}
+                            </h4>
                             <span>{product.price} // {product.category?.toUpperCase() || 'NEW'}</span>
                           </div>
                           <div className="ap-actions">
+                            <button
+                              type="button"
+                              className={product.is_sold_out ? 'ap-btn-stock ap-btn-sold-out' : 'ap-btn-stock ap-btn-in-stock'}
+                              title="Click to toggle In Stock / Sold Out"
+                              onClick={() => handleToggleSoldOut(product)}
+                            >
+                              {product.is_sold_out ? '🔴 Sold Out' : '🟢 In Stock'}
+                            </button>
                             <button className="ap-btn-outline" onClick={() => handleEditProduct(product)}>EDIT</button>
                             <button className="ap-btn-danger" onClick={() => handleDeleteProduct(product.id)}>DELETE</button>
                           </div>
                         </div>
                       ))}
+
                       {products.length === 0 && (
                         <div className="ap-card" style={{ padding: '3rem', textAlign: 'center', opacity: 0.6 }}>
                           No products found. Add your first piece using the form on the left.
