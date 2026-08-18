@@ -9,8 +9,8 @@
     <link rel="icon" type="image/png" href="/chinni_favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <!-- ══ Viewport & PWA Capabilities ══ -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- ══ Viewport & PWA Capabilities — Locked 1:1 Scale for Native Mobile Feel ══ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="theme-color" content="#2A0108" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#2A0108" />
@@ -19,12 +19,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="House of Varsh" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-    <!-- ══ Instant dark bg — prevents white flash on load ══ -->
+    <!-- ══ Instant dark bg & gesture zoom prevention ══ -->
     <style>
-      html, body { background: #2A0108; }
-      #root { opacity: 0; transition: opacity 0.35s ease; }
+      html, body { 
+        background: #2A0108; 
+        overflow-x: hidden; 
+        max-width: 100vw; 
+        touch-action: pan-y;
+      }
+      #root { opacity: 0; transition: opacity 0.35s ease; width: 100%; overflow-x: hidden; }
       #root.ready { opacity: 1; }
     </style>
+    <script>
+      // Prevent accidental pinch-zoom gesture distortion on iOS Safari
+      document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+      document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
+      document.addEventListener('gestureend', function(e) { e.preventDefault(); }, { passive: false });
+    </script>
+
 
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- PRIMARY SEO META TAGS — Crafted for Maximum SERP Ranking  -->

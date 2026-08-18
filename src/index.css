@@ -43,6 +43,9 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   height: -webkit-fill-available;
+  overflow-x: hidden;
+  max-width: 100%;
+  touch-action: pan-y;
 }
 
 html.lenis {
@@ -70,6 +73,9 @@ body {
   color: var(--text-dark);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Ensures content is immediately visible when scroll is restored */
@@ -77,8 +83,10 @@ body {
   min-height: -webkit-fill-available;
   /* Prevent content from flickering on iOS during scroll momentum */
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   overscroll-behavior-y: none;
 }
+
 
 #root {
   /* Content is faded in by main.tsx after mount — prevents FOUC */
